@@ -1,394 +1,390 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comandas - Pizzería Gourmet</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { font-family: 'Roboto', sans-serif; }
-        h1, h2, h3 { font-family: 'Roboto Slab', serif; }
-        .btn-spinner {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        /* Estilos para la impresión del ticket */
-        @media print {
-            body * { visibility: hidden; }
-            #ticket-imprimible, #ticket-imprimible * { visibility: visible; }
-            #ticket-imprimible {
-                position: absolute; left: 0; top: 0; width: 100%;
-                font-family: 'Courier New', Courier, monospace;
-                font-size: 10px; color: #000;
-            }
-            #ticket-imprimible h1 { font-size: 14px; font-weight: bold; text-align: center; margin-bottom: 5px; }
-            #ticket-imprimible p { margin-bottom: 3px; }
-            #ticket-imprimible .item-line, #ticket-imprimible .total-line { display: flex; justify-content: space-between; }
-            #ticket-imprimible .total-line { border-top: 1px dashed #000; padding-top: 3px; margin-top: 5px; font-weight: bold; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sistema de Comandas - Pizzería Gourmet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  body { font-family: 'Roboto', sans-serif; }
+  h1,h2,h3 { font-family: 'Roboto Slab', serif; }
+  .btn-spinner { animation: spin 1s linear infinite; }
+  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+  /* Botones de producto: forzar texto en varias líneas y sin recorte */
+  .producto-btn { white-space: normal; text-align: left; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; }
+
+  /* Modal básico */
+  .modal-bg { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; }
+  .modal { background:white; border-radius: 8px; padding:1rem; max-width:520px; width:95%; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+  /* Impresión para POS-58 (58mm) */
+  @media print {
+    @page { size: 58mm auto; margin: 0; }
+    body * { visibility: hidden; }
+    #ticket-imprimible, #ticket-imprimible * { visibility: visible; }
+    #ticket-imprimible { position: absolute; left:0; top:0; width:58mm; font-family: 'Courier New', monospace; font-size: 12px; color:#000; padding:6px; box-sizing:border-box; }
+    #ticket-imprimible h1 { font-size:14px; text-align:center; margin:0 0 4px 0; }
+    #ticket-imprimible p { margin:0; line-height:1.1; }
+    .item-line, .total-line { display:flex; justify-content:space-between; }
+    .total-line { border-top:1px dashed #000; margin-top:5px; padding-top:4px; font-weight:bold; }
+  }
+</style>
 </head>
 <body class="bg-slate-100 text-slate-800">
 
-    <!-- Vista Principal: Toma de Pedidos -->
-    <main id="vista-pedidos" class="p-4 md:p-6">
-        <header class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-300">
-            <h1 class="text-4xl font-bold text-slate-900">Pizzería "Gourmet"</h1>
-            <button id="btn-ir-a-precios" class="bg-slate-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-800 transition-all duration-300 shadow-md flex items-center gap-2 mt-4 sm:mt-0">
-                <i class="fas fa-cog"></i>
-                <span>Actualizar Precios</span>
-            </button>
-        </header>
+<main id="vista-pedidos" class="p-4 md:p-6">
+  <header class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-300">
+    <h1 class="text-3xl font-bold text-slate-900">Pizzería "Gourmet"</h1>
+    <div class="flex gap-2 items-center">
+      <button id="btn-agregar-producto" class="bg-blue-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+        <i class="fas fa-plus"></i> Agregar producto
+      </button>
+      <button id="btn-ir-a-precios" class="bg-slate-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-slate-800 flex items-center gap-2">
+        <i class="fas fa-cog"></i> Actualizar Precios
+      </button>
+    </div>
+  </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Columna de Productos -->
-            <div id="lista-productos" class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-3xl font-semibold mb-5">Menú</h2>
-                <div id="categorias-container" class="space-y-8">
-                    <div class="text-center p-8">
-                        <i class="fas fa-spinner fa-spin text-5xl text-red-700"></i>
-                        <p class="mt-3 text-slate-600">Cargando productos...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Columna de la Comanda -->
-            <aside class="bg-slate-800 text-white p-6 rounded-xl shadow-lg flex flex-col lg:sticky top-6">
-                <h2 class="text-3xl font-semibold mb-4">Comanda Actual</h2>
-                <div id="comanda-items" class="flex-grow min-h-[300px] border-b border-slate-600 pb-4 mb-4 overflow-y-auto">
-                    <p id="comanda-vacia" class="text-slate-400 text-center mt-12">Agrega productos del menú para iniciar una comanda.</p>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center text-2xl font-bold">
-                        <span>TOTAL:</span>
-                        <span id="comanda-total">$0.00</span>
-                    </div>
-                    <button id="btn-imprimir" class="w-full bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-md flex items-center justify-center gap-2 disabled:bg-slate-500 disabled:cursor-not-allowed" disabled>
-                        <i class="fas fa-print"></i>
-                        <span>Imprimir Comanda</span>
-                    </button>
-                    <button id="btn-limpiar" class="w-full bg-rose-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-rose-700 transition-all duration-300 shadow-md">
-                        <span>Limpiar Comanda</span>
-                    </button>
-                </div>
-            </aside>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div id="lista-productos" class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">Menú</h2>
+      <div id="categorias-container" class="space-y-8">
+        <div class="text-center p-8">
+          <i class="fas fa-spinner fa-spin text-4xl text-red-700"></i>
+          <p class="mt-3 text-slate-600">Cargando productos...</p>
         </div>
-    </main>
+      </div>
+    </div>
 
-    <!-- Vista de Edición de Precios -->
-    <section id="vista-precios" class="p-4 md:p-6 hidden">
-        <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-300">
-            <h1 class="text-4xl font-bold text-slate-900">Editar Precios</h1>
-            <button id="btn-volver-a-pedidos" class="bg-slate-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-700 transition-all duration-300 shadow-md flex items-center gap-2">
-                <i class="fas fa-arrow-left"></i>
-                <span>Volver</span>
-            </button>
-        </header>
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
-            <div id="lista-precios-container" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
-            <div id="feedback-precios" class="mt-4 text-center"></div>
-            <div class="mt-6 text-right">
-                <button id="btn-guardar-precios" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-md flex items-center gap-2 disabled:bg-slate-500 disabled:cursor-not-allowed">
-                    <i id="save-icon" class="fas fa-save"></i>
-                    <span id="save-text">Guardar Cambios</span>
-                </button>
-            </div>
+    <aside class="bg-slate-800 text-white p-6 rounded-xl shadow-lg flex flex-col">
+      <h2 class="text-2xl font-semibold mb-4">Comanda Actual</h2>
+      <div id="comanda-items" class="flex-grow min-h-[200px] border-b border-slate-600 pb-4 mb-4 overflow-y-auto">
+        <p id="comanda-vacia" class="text-slate-400 text-center mt-12">Agrega productos del menú para iniciar una comanda.</p>
+      </div>
+      <div class="space-y-4">
+        <div class="flex justify-between items-center text-2xl font-bold">
+          <span>TOTAL:</span>
+          <span id="comanda-total">$0.00</span>
         </div>
-    </section>
-    
-    <!-- Contenedor para el ticket imprimible -->
-    <div id="ticket-imprimible" class="hidden"></div>
+        <button id="btn-imprimir" class="w-full bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2 disabled:bg-slate-500" disabled>
+          <i class="fas fa-print"></i> Imprimir Comanda
+        </button>
+        <button id="btn-limpiar" class="w-full bg-rose-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-rose-700">
+          Limpiar Comanda
+        </button>
+      </div>
+    </aside>
+  </div>
+</main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- CONFIGURACIÓN ---
-            const URL_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpTRK2Hf7YmhcCExgsz0-GNJjeLXN3LCPw2J3z0Tp5t_WQyny9vh4T5QWM6W9diJntg5yD3THw-LqP/pub?output=csv';
-                const fmt = new Intl.NumberFormat(\'es-AR\', { style: \'currency\', currency: \'ARS\' });
-            // URL del Google Apps Script
-            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyk437BQbqBB5RrqgLQmPkDEEEES-aETvU3Scc6EaC8l9keeEdfU9aj2rJXAD5MRv5FVQ/exec';
+<section id="vista-precios" class="p-4 md:p-6 hidden">
+  <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-300">
+    <h1 class="text-3xl font-bold text-slate-900">Editar Precios</h1>
+    <button id="btn-volver-a-pedidos" class="bg-slate-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-700 flex items-center gap-2">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </header>
 
-            // Estado de la aplicación
-            let productos = [];
-            let comanda = [];
+  <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
+    <div id="lista-precios-container" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2"></div>
+    <div id="feedback-precios" class="mt-4 text-center"></div>
+    <div class="mt-6 text-right">
+      <button id="btn-guardar-precios" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 flex items-center gap-2 disabled:bg-slate-500">
+        <i id="save-icon" class="fas fa-save"></i> <span id="save-text">Guardar Cambios</span>
+      </button>
+    </div>
+  </div>
+</section>
 
-            // Alias para elementos del DOM
-            const a = id => document.getElementById(id);
-            const vistaPedidos = a('vista-pedidos'), vistaPrecios = a('vista-precios');
-            const categoriasContainer = a('categorias-container'), comandaItemsContainer = a('comanda-items');
-            
-            // Delegación para agregar a comanda (evita problemas con comillas en id)
-            categoriasContainer.addEventListener('click', (e) => {
-                const btn = e.target.closest('[data-id]');
-                if (!btn) return;
-                const id = decodeURIComponent(btn.dataset.id || '');
-                if (id) agregarAComanda(id);
-            });
-const comandaTotalEl = a('comanda-total'), comandaVaciaEl = a('comanda-vacia');
-            const listaPreciosContainer = a('lista-precios-container'), btnImprimir = a('btn-imprimir');
-            const btnLimpiar = a('btn-limpiar'), ticketImprimibleContainer = a('ticket-imprimible');
-            const btnGuardarPrecios = a('btn-guardar-precios');
+<!-- Modal Agregar Producto -->
+<div id="modal-agregar" class="hidden">
+  <div class="modal-bg">
+    <div class="modal">
+      <h3 class="text-xl font-bold mb-3">Agregar Producto</h3>
+      <div class="space-y-3">
+        <div><label class="block text-sm font-medium">Categoría</label><input id="input-cat" class="w-full border p-2 rounded" /></div>
+        <div><label class="block text-sm font-medium">Nombre del producto</label><input id="input-prod" class="w-full border p-2 rounded" /></div>
+        <div><label class="block text-sm font-medium">Tamaño</label><input id="input-tam" class="w-full border p-2 rounded" /></div>
+        <div><label class="block text-sm font-medium">Precio</label><input id="input-precio" type="number" step="0.01" class="w-full border p-2 rounded" /></div>
+        <div class="flex justify-end gap-2 mt-3">
+          <button id="cancel-add" class="px-4 py-2 rounded border">Cancelar</button>
+          <button id="confirm-add" class="px-4 py-2 bg-blue-600 text-white rounded">Agregar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-            // --- NAVEGACIÓN ---
-            a('btn-ir-a-precios').addEventListener('click', () => cambiarVista('precios'));
-            a('btn-volver-a-pedidos').addEventListener('click', () => cambiarVista('pedidos'));
+<!-- Ticket imprimible -->
+<div id="ticket-imprimible" class="hidden"></div>
 
-            async function cambiarVista(vista) {
-                if (vista === 'precios') {
-                    vistaPedidos.classList.add('hidden');
-                    vistaPrecios.classList.remove('hidden');
-                    if (!productos || !productos.length) {
-                        await cargarProductos();
-                    }
-                    renderizarEditorDePrecios();
-                } else {
-                    vistaPrecios.classList.add('hidden');
-                    vistaPedidos.classList.remove('hidden');
-                    iniciarApp();
-                }
-            }
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // --- CONFIG ---
+  const URL_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpTRK2Hf7YmhcCExgsz0-GNJjeLXN3LCPw2J3z0Tp5t_WQyny9vh4T5QWM6W9diJntg5yD3THw-LqP/pub?output=csv';
+  // REEMPLAZA esta URL con la URL que obtengas al desplegar tu Apps Script web app
+  let APPS_SCRIPT_URL = 'REEMPLAZAR_POR_TU_APPS_SCRIPT_URL';
 
-            // --- LÓGICA DE DATOS ---
-            async function cargarProductos() {
-                try {
-                    // Se agrega un parámetro a la URL para evitar problemas de caché
-                    const response = await fetch(`${URL_SHEET}&t=${new Date().getTime()}`);
-                    if (!response.ok) throw new Error('Error al cargar datos desde Google Sheets.');
-                    const csvText = await response.text();
-                    productos = parseCSV(csvText);
-                    renderizarProductos();
-                } catch (error) {
-                    console.error('Error:', error);
-                    categoriasContainer.innerHTML = `<p class="text-red-600 text-center font-semibold">No se pudieron cargar los productos. Revisa la URL o tu conexión.</p>`;
-                }
-            }
+  let productos = [];
+  let comanda = [];
 
-            function parseCSV(text) {
-                const lines = text.trim().split(/?
-/);
-                // quitar encabezado
-                const rows = lines.slice(1).map(l =>
-                    l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(s => s.replace(/^"|"$/g, '').trim())
-                );
-                return rows
-                    .filter(cols => cols.length >= 4)
-                    .map(([cat, prod, tam, precio]) => {
-                        const precioLimpio = Number(
-                            String(precio ?? '')
-                              .replace(/\./g, '')      // miles
-                              .replace(',', '.')       // decimal
-                              .replace(/[^0-9.-]/g, '')// otros símbolos
-                        ) || 0;
-                        const id = `${cat.trim()} | ${prod.trim()} - ${tam.trim()}`;
-                        return { id, categoria: cat.trim(), producto: prod.trim(), tamano: tam.trim(), precio: precioLimpio };
-                    });
-            }
-- ${tam.trim()}`,
-                        categoria: cat.trim(), producto: prod.trim(), tamano: tam.trim(),
-                        precio: precioLimpio
-                    };
-                }).filter(p => p && p.producto && p.tamano);
-            }
-            
-            // --- RENDERIZADO DE VISTAS ---
-            function renderizarProductos() {
-                const porCategoria = productos.reduce((acc, p) => {
-                    (acc[p.categoria] = acc[p.categoria] || []).push(p);
-                    return acc;
-                }, {});
-                categoriasContainer.innerHTML = Object.keys(porCategoria).map(categoria => `
-                    <div>
-                        <h3 class="text-2xl font-bold border-b-2 border-red-700 pb-2 mb-4 text-slate-800">${categoria}</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            ${porCategoria[categoria].map(p => `
-                                <button class="bg-slate-200 p-3 rounded-lg text-center hover:bg-red-700 hover:text-white transition-all duration-300 shadow focus:outline-none focus:ring-2 focus:ring-red-500 flex flex-col justify-between group"
-                                        data-id="${encodeURIComponent(p.id)}">
-                                    <div>
-                                        <p class="font-semibold">${p.producto}</p>
-                                        <p class="text-xs text-slate-600 group-hover:text-red-100">${p.tamano}</p>
-                                    </div>
-                                    <p class="font-bold text-lg mt-2">${fmt.format(p.precio)}</p>
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            }
+  const a = id => document.getElementById(id);
+  const vistaPedidos = a('vista-pedidos'), vistaPrecios = a('vista-precios');
+  const categoriasContainer = a('categorias-container'), comandaItemsContainer = a('comanda-items');
+  const comandaTotalEl = a('comanda-total'), comandaVaciaEl = a('comanda-vacia');
+  const listaPreciosContainer = a('lista-precios-container'), btnImprimir = a('btn-imprimir');
+  const btnLimpiar = a('btn-limpiar'), ticketImprimibleContainer = a('ticket-imprimible');
+  const btnGuardarPrecios = a('btn-guardar-precios');
 
-            function renderizarComanda() {
-                btnImprimir.disabled = comanda.length === 0;
-                if (comanda.length === 0) {
-                    comandaItemsContainer.innerHTML = `
-                      <p class="text-slate-400 text-center mt-12">Agrega productos del menú para iniciar una comanda.</p>`;
-                } else {
-                    comandaItemsContainer.innerHTML = comanda.map((item, index) => `
-                      <div class="flex justify-between items-center py-2 border-b border-slate-600">
-                        <div>
-                          <p class="font-semibold text-white">${item.producto} <span class="font-normal text-slate-300 text-sm">(${item.tamano})</span></p>
-                          <p class="text-sm text-slate-300">
-                            <button class="px-2 rounded-full bg-slate-500 hover:bg-slate-400" onclick="actualizarCantidad(${index}, -1)">-</button>
-                            <span class="mx-2 font-bold">${item.cantidad}</span>
-                            <button class="px-2 rounded-full bg-slate-500 hover:bg-slate-400" onclick="actualizarCantidad(${index}, 1)">+</button>
-                            x ${fmt.format(item.precio)}
-                          </p>
-                        </div>
-                        <p class="font-bold text-lg">${fmt.format(item.cantidad * item.precio)}</p>
-                      </div>
-                    `).join('');
-                }
-                const total = comanda.reduce((acc, it) => acc + it.cantidad * it.precio, 0);
-                comandaTotalEl.textContent = fmt.format(total);
-            }
-<span class="font-normal text-slate-300 text-sm">(${item.tamano})</span></p>
-                            <p class="text-sm text-slate-300">
-                                <button class="px-2 rounded-full bg-slate-500 hover:bg-slate-400" onclick="actualizarCantidad(${index}, -1)">-</button>
-                                <span class="mx-2 font-bold">${item.cantidad}</span>
-                                <button class="px-2 rounded-full bg-slate-500 hover:bg-slate-400" onclick="actualizarCantidad(${index}, 1)">+</button>
-                                x ${fmt.format(item.precio)}
-                            </p>
-                        </div>
-                        <p class="font-bold text-lg">${fmt.format((item.cantidad * item.precio))}</p>
-                    </div>
-                `).join('');
-                const total = comanda.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
-                comandaTotalEl.textContent = `${fmt.format(total)}`;
-            }
-            
-            function renderizarEditorDePrecios() {
-                listaPreciosContainer.innerHTML = productos.sort((a,b) => a.id.localeCompare(b.id)).map(p => `
-                    <div class="grid grid-cols-3 items-center gap-4 py-2 border-b">
-                        <span class="col-span-2 font-medium">${p.id}</span>
-                        <div class="flex items-center">
-                            <span class="mr-2 text-slate-500">$</span>
-                            <input type="number" step="0.01" min="0" value="${p.precio.toFixed(2)}" data-producto-id="${p.id}" data-precio-original="${p.precio}"
-                                   class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            // --- MANEJO DE LA COMANDA ---
-            window.agregarAComanda = id => {
-                const producto = productos.find(p => p.id === id);
-                const itemExistente = comanda.find(item => item.id === id);
-                if (itemExistente) itemExistente.cantidad++;
-                else comanda.push({ ...producto, cantidad: 1 });
-                renderizarComanda();
-            };
+  // navegación
+  a('btn-ir-a-precios').addEventListener('click', ()=> cambiarVista('precios'));
+  a('btn-volver-a-pedidos').addEventListener('click', ()=> cambiarVista('pedidos'));
+  a('btn-agregar-producto').addEventListener('click', ()=> showModal(true));
 
-            window.actualizarCantidad = (index, cambio) => {
-                comanda[index].cantidad += cambio;
-                if (comanda[index].cantidad <= 0) comanda.splice(index, 1);
-                renderizarComanda();
-            };
-            
-            btnLimpiar.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que quieres limpiar la comanda actual?')) {
-                    comanda = [];
-                    renderizarComanda();
-                }
-            });
+  function cambiarVista(vista) {
+    if (vista === 'precios') {
+      vistaPedidos.classList.add('hidden');
+      vistaPrecios.classList.remove('hidden');
+      renderizarEditorDePrecios();
+    } else {
+      vistaPrecios.classList.add('hidden');
+      vistaPedidos.classList.remove('hidden');
+      iniciarApp();
+    }
+  }
 
-            // --- GUARDADO DE PRECIOS Y COMUNICACIÓN CON APPS SCRIPT ---
-            btnGuardarPrecios.addEventListener('click', async () => {
-                const inputs = listaPreciosContainer.querySelectorAll('input[data-producto-id]');
-                const feedbackEl = a('feedback-precios');
-                const saveIcon = a('save-icon');
-                const saveText = a('save-text');
+  // modal add
+  function showModal(show) {
+    const modal = a('modal-agregar');
+    if (show) {
+      modal.classList.remove('hidden');
+    } else {
+      modal.classList.add('hidden');
+      ['input-cat','input-prod','input-tam','input-precio'].forEach(id => a(id).value = '');
+    }
+  }
+  a('cancel-add').addEventListener('click', ()=> showModal(false));
+  a('confirm-add').addEventListener('click', async () => {
+    const cat = a('input-cat').value.trim();
+    const prod = a('input-prod').value.trim();
+    const tam = a('input-tam').value.trim();
+    const precio = parseFloat(a('input-precio').value) || 0;
+    if (!cat || !prod || !tam) { alert('Completá categoría, producto y tamaño.'); return; }
 
-                const actualizaciones = Array.from(inputs).map(input => ({
-                    id: input.dataset.productoId,
-                    precio: Number(String(input.value).replace(/\./g,'').replace(',', '.').replace(/[^0-9.-]/g,'')),
-                    precioOriginal: parseFloat(input.dataset.precioOriginal)
-                })).filter(p => p.precio !== p.precioOriginal);
+    // Generar ID automático (producto - tamaño)
+    const id = `${prod} - ${tam}`;
+    // Primero actualizar UI local
+    const nuevo = { id, categoria: cat, producto: prod, tamano: tam, precio };
+    productos.push(nuevo);
+    renderizarProductos();
 
-                if (actualizaciones.length === 0) {
-                    feedbackEl.innerHTML = `<p class="text-blue-600">No hay cambios para guardar.</p>`;
-                    return;
-                }
+    // Enviar al Apps Script para agregar a la hoja
+    try {
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ action:'add_product', product: nuevo })
+      });
+      const json = await resp.json();
+      if (json.ok) { showModal(false); alert('Producto agregado correctamente.'); }
+      else alert('Ocurrió un problema al agregar en la sheet.');
+    } catch (e) {
+      console.error(e);
+      alert('Error al comunicarse con el servidor. Revisa el Apps Script y CORS.');
+    }
+  });
 
-                btnGuardarPrecios.disabled = true;
-                saveText.textContent = 'Guardando...';
-                saveIcon.className = 'fas fa-spinner btn-spinner';
-                feedbackEl.innerHTML = `<p class="text-slate-600">Actualizando ${actualizaciones.length} producto(s)...</p>`;
-                
-                // Se envían todas las actualizaciones en paralelo
-                const promesas = actualizaciones.map(p => 
-                    fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ id: p.id, precio: p.precio }),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Necesario para evitar preflight
-                        mode: 'no-cors' // No podremos leer la respuesta, pero la acción se ejecutará
-                    })
-                );
+  // cargar CSV
+  async function cargarProductos() {
+    try {
+      const response = await fetch(`${URL_SHEET}&t=${new Date().getTime()}`);
+      if (!response.ok) throw new Error('Error al cargar CSV');
+      const csvText = await response.text();
+      productos = parseCSV(csvText);
+      renderizarProductos();
+    } catch (err) {
+      console.error(err);
+      categoriasContainer.innerHTML = `<p class="text-red-600 text-center font-semibold">No se pudieron cargar los productos. Revisa la URL o tu conexión.</p>`;
+    }
+  }
 
-                try {
-                    await Promise.all(promesas);
-                    // Intento de verificación básica: re-cargar y comprobar
-                    try {
-                        await new Promise(r => setTimeout(r, 1200));
-                        await cargarProductos();
-                        const ok = actualizaciones.every(u => {
-                            const p = productos.find(x => x.id === u.id);
-                            return p && Number(p.precio) === Number(u.precio);
-                        });
-                        if (!ok) throw new Error('Verificación fallida');
-                    } catch (verErr) {
-                        console.warn('No se pudo verificar completamente la actualización:', verErr);
-                    }
-                    \1feedbackEl.innerHTML = `<p class="text-green-600 font-bold">¡Precios actualizados con éxito! La página se recargará para reflejar los cambios.</p>`;
-                    setTimeout(() => cambiarVista('pedidos'), 2500); // Dar tiempo para leer el mensaje
-                } catch (error) {
-                    console.error('Error al actualizar:', error);
-                    feedbackEl.innerHTML = `<p class="text-red-600 font-bold">Hubo un error al guardar. Revisa la consola para más detalles.</p>`;
-                    btnGuardarPrecios.disabled = false;
-                    saveText.textContent = 'Guardar Cambios';
-                    saveIcon.className = 'fas fa-save';
-                }
-            });
+  function parseCSV(text) {
+    // robusto: aceptamos comas dentro de campos entre comillas (simple)
+    const lines = text.trim().split('\n');
+    const rows = lines.slice(1).map(line => {
+      // split respetando comillas simples y dobles (simple split CSV)
+      const cols = line.split(',').map(c => c.replace(/^"(.*)"$/, '$1').trim());
+      if (cols.length < 4) return null;
+      const [cat, prod, tam, precio] = cols;
+      const precioLimpio = precio ? parseFloat(precio.replace(/[\r$]/g,'').trim()) : 0;
+      return { id: `${prod.trim()} - ${tam.trim()}`, categoria: cat.trim(), producto: prod.trim(), tamano: tam.trim(), precio: precioLimpio };
+    }).filter(r => r && r.producto);
+    return rows;
+  }
 
-            // --- IMPRESIÓN ---
-            btnImprimir.addEventListener('click', () => {
-                if (comanda.length === 0) return;
-                const ahora = new Date();
-                const fecha = ahora.toLocaleDateString('es-AR');
-                const hora = ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute:'2-digit' });
-                const total = comanda.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
-                
-                ticketImprimibleContainer.innerHTML = `
-                    <h1>Pizzería "Gourmet"</h1>
-                    <p>Fecha: ${fecha} - Hora: ${hora}</p>
-                    <p>---------------------------------</p>
-                    ${comanda.map(item => `
-                        <div class="item-line">
-                            <span>${item.cantidad}x ${item.producto} ${item.tamano}</span>
-                            <span>${fmt.format((item.cantidad * item.precio))}</span>
-                        </div>
-                    `).join('')}
-                    <div class="total-line">
-                        <span>TOTAL:</span>
-                        <span>${fmt.format(total)}</span>
-                    </div>
-                    <p style="text-align:center; margin-top: 10px;">¡Gracias por su compra!</p>
-                `;
-                window.print();
-            });
+  function renderizarProductos() {
+    if (!productos.length) {
+      categoriasContainer.innerHTML = `<p class="text-slate-600 text-center">No hay productos cargados.</p>`;
+      return;
+    }
+    const porCategoria = productos.reduce((acc,p)=> { (acc[p.categoria]=acc[p.categoria]||[]).push(p); return acc; }, {});
+    categoriasContainer.innerHTML = Object.keys(porCategoria).map(cat => `
+      <div>
+        <h3 class="text-xl font-bold border-b pb-2 mb-4 text-slate-800">${cat}</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          ${porCategoria[cat].map(p=> `
+            <button class="producto-btn bg-slate-200 p-3 rounded-lg hover:bg-red-700 hover:text-white transition-all duration-300 shadow focus:outline-none focus:ring-2 focus:ring-red-500 flex flex-col justify-between group"
+                    data-id="${p.id}">
+              <div>
+                <p class="font-semibold">${p.producto}</p>
+                <p class="text-xs text-slate-600 group-hover:text-red-100">${p.tamano}</p>
+              </div>
+              <p class="font-bold text-lg mt-2">$${p.precio.toFixed(2)}</p>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+    // Asociar handlers
+    document.querySelectorAll('#lista-productos button[data-id]').forEach(btn=>{
+      btn.addEventListener('click', ()=> agregarAComanda(btn.dataset.id));
+    });
+  }
 
-            // --- INICIO DE LA APP ---
-            function iniciarApp() {
-                cargarProductos();
-                renderizarComanda();
-            }
+  // comanda
+  window.agregarAComanda = id => {
+    const producto = productos.find(p => p.id === id);
+    if (!producto) return;
+    const itemExistente = comanda.find(i=>i.id===id);
+    if (itemExistente) itemExistente.cantidad++;
+    else comanda.push({...producto, cantidad:1});
+    renderizarComanda();
+  };
 
-            iniciarApp();
+  window.actualizarCantidad = (index,cambio) => {
+    comanda[index].cantidad += cambio;
+    if (comanda[index].cantidad <= 0) comanda.splice(index,1);
+    renderizarComanda();
+  };
+
+  function renderizarComanda() {
+    comandaVaciaEl.classList.toggle('hidden', comanda.length>0);
+    btnImprimir.disabled = comanda.length === 0;
+    comandaItemsContainer.innerHTML = comanda.length === 0 ? comandaVaciaEl.outerHTML : comanda.map((item, index)=>`
+      <div class="flex justify-between items-center py-2 border-b border-slate-600">
+        <div>
+          <p class="font-semibold text-white">${item.producto} <span class="font-normal text-slate-300 text-sm">(${item.tamano})</span></p>
+          <p class="text-sm text-slate-300">
+            <button class="px-2 rounded-full bg-slate-500" onclick="actualizarCantidad(${index}, -1)">-</button>
+            <span class="mx-2 font-bold">${item.cantidad}</span>
+            <button class="px-2 rounded-full bg-slate-500" onclick="actualizarCantidad(${index}, 1)">+</button>
+            x $${item.precio.toFixed(2)}
+          </p>
+        </div>
+        <p class="font-bold text-lg">$${(item.cantidad * item.precio).toFixed(2)}</p>
+      </div>
+    `).join('');
+    const total = comanda.reduce((acc,i)=>acc + (i.cantidad * i.precio),0);
+    comandaTotalEl.textContent = `$${total.toFixed(2)}`;
+  }
+
+  a('btn-limpiar').addEventListener('click', ()=> {
+    if (confirm('¿Limpiar la comanda actual?')) { comanda = []; renderizarComanda(); }
+  });
+
+  // editor de precios
+  function renderizarEditorDePrecios() {
+    listaPreciosContainer.innerHTML = productos.sort((a,b)=>a.id.localeCompare(b.id)).map(p => `
+      <div class="grid grid-cols-3 items-center gap-4 py-2 border-b">
+        <span class="col-span-2 font-medium">${p.id}</span>
+        <div class="flex items-center">
+          <span class="mr-2 text-slate-500">$</span>
+          <input type="number" step="0.01" value="${p.precio.toFixed(2)}" data-producto-id="${p.id}" data-prod="${p.producto}" data-tam="${p.tamano}" class="w-full p-2 border rounded-md">
+        </div>
+      </div>
+    `).join('');
+  }
+
+  btnGuardarPrecios.addEventListener('click', async () => {
+    const inputs = listaPreciosContainer.querySelectorAll('input[data-producto-id]');
+    const feedbackEl = a('feedback-precios');
+    const saveIcon = a('save-icon'), saveText = a('save-text');
+
+    const actualizaciones = Array.from(inputs).map(input => ({
+      id: input.dataset.productoId,
+      producto: input.dataset.prod,
+      tamano: input.dataset.tam,
+      precio: parseFloat(input.value)
+    }));
+
+    // comprobar cambios reales comparando con productos[]
+    const cambios = actualizaciones.filter(a1 => {
+      const origen = productos.find(p=>p.id===a1.id);
+      return origen && origen.precio !== a1.precio;
+    });
+
+    if (cambios.length === 0) { feedbackEl.innerHTML = `<p class="text-blue-600">No hay cambios para guardar.</p>`; return; }
+
+    btnGuardarPrecios.disabled = true; saveText.textContent = 'Guardando...'; saveIcon.className = 'fas fa-spinner btn-spinner';
+    feedbackEl.innerHTML = `<p class="text-slate-600">Actualizando ${cambios.length} producto(s)...</p>`;
+
+    try {
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ action:'update_prices', updates: cambios })
+      });
+      const json = await resp.json();
+      if (json.ok) {
+        feedbackEl.innerHTML = `<p class="text-green-600 font-bold">¡Precios actualizados con éxito!</p>`;
+        // actualizar la lista local y volver a vista pedidos
+        cambios.forEach(c => {
+          const p = productos.find(x=>x.id===c.id);
+          if (p) p.precio = c.precio;
         });
-    </script>
+        setTimeout(()=> cambiarVista('pedidos'), 900);
+      } else {
+        throw new Error(json.message || 'Error en respuesta');
+      }
+    } catch (e) {
+      console.error(e);
+      feedbackEl.innerHTML = `<p class="text-red-600 font-bold">Hubo un error al guardar. Revisa la consola y el Apps Script.</p>`;
+      btnGuardarPrecios.disabled = false; saveText.textContent = 'Guardar Cambios'; saveIcon.className = 'fas fa-save';
+    }
+  });
+
+  // botón "Actualizar Precios" en la cabecera: recarga CSV y abre editor
+  a('btn-ir-a-precios').addEventListener('click', async () => {
+    await cargarProductos();
+    cambiarVista('precios');
+  });
+
+  // imprimir
+  btnImprimir.addEventListener('click', () => {
+    if (comanda.length === 0) return;
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString('es-AR');
+    const hora = ahora.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    const total = comanda.reduce((acc,i)=>acc + (i.cantidad * i.precio),0);
+
+    ticketImprimibleContainer.innerHTML = `
+      <h1>Pizzería "Gourmet"</h1>
+      <p>Fecha: ${fecha}  Hora: ${hora}</p>
+      <p>-----------------------------</p>
+      ${comanda.map(i=>`<div class="item-line"><span>${i.cantidad}x ${i.producto} ${i.tamano}</span><span>$${(i.cantidad*i.precio).toFixed(2)}</span></div>`).join('')}
+      <div class="total-line"><span>TOTAL:</span><span>$${total.toFixed(2)}</span></div>
+      <p style="text-align:center; margin-top:8px;">¡Gracias por su compra!</p>
+    `;
+    window.print();
+  });
+
+  // iniciar app
+  function iniciarApp() { cargarProductos(); renderizarComanda(); }
+  iniciarApp();
+});
+</script>
 </body>
 </html>
-
