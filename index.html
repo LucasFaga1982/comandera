@@ -124,7 +124,7 @@
                 </div>
                 <div>
                     <label for="nuevo-producto" class="block text-sm font-medium text-slate-700">Nombre del Producto</label>
-                    <input type="text" id="nuevo-producto" required class="mt-1 block w-full p-2 border border-slate-300 rounded-md focus:ring-red-500 focus:border-red-500" placeholder="Ej: Muzzarella">
+                    <input type="text" id="nuevo-producto" required class="mt-1 block w-full p-2 border border-slate-300 rounded-md focus:ring-red-500 focus:border-red-500" placeholder="Ej: Muzzarella Especial">
                 </div>
                 <div>
                     <label for="nuevo-tamano" class="block text-sm font-medium text-slate-700">Tamaño/Variante</label>
@@ -149,8 +149,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIGURACIÓN ---
+            // URL de publicación CSV de la hoja de cálculo (solo lectura)
             const URL_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpTRK2Hf7YmhcCExgsz0-GNJjeLXN3LCPw2J3z0Tp5t_WQyny9vh4T5QWM6W9diJntg5yD3THw-LqP/pub?output=csv';
-            // URL del Google Apps Script
+            // URL del Google Apps Script (para POST/escritura)
             const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyk437BQbqBB5RrqgLQmPkDEEEES-aETvU3Scc6EaC8l9keeEdfU9aj2rJXAD5MRv5FVQ/exec';
 
             // Estado de la aplicación
@@ -175,6 +176,7 @@
             const newProductIcon = a('new-product-icon');
             const newProductText = a('new-product-text');
 
+
             // --- NAVEGACIÓN ---
             a('btn-ir-a-precios').addEventListener('click', () => cambiarVista('precios'));
             a('btn-volver-a-pedidos').addEventListener('click', () => cambiarVista('pedidos'));
@@ -187,12 +189,12 @@
                 } else {
                     vistaPrecios.classList.add('hidden');
                     vistaPedidos.classList.remove('hidden');
-                    // Al volver a pedidos, recargamos la lista para obtener los nuevos precios/productos
-                    iniciarApp();
+                    // Al volver a pedidos, forzamos la recarga de datos
+                    iniciarApp(); 
                 }
             }
 
-            // --- LÓGICA DE DATOS ---
+            // --- LÓGICA DE DATOS Y PARSEO CSV (Reforzado) ---
             async function cargarProductos() {
                 try {
                     // Se agrega un parámetro a la URL para evitar problemas de caché
@@ -206,21 +208,31 @@
                     categoriasContainer.innerHTML = `<p class="text-red-600 text-center font-semibold">No se pudieron cargar los productos. Revisa la URL o tu conexión.</p>`;
                 }
             }
-
+            
+            // Función reforzada para parsear CSV y limpiar datos
             function parseCSV(text) {
                 return text.split('\n').slice(1).map(linea => {
-                    // El regex busca una coma, a menos que esté dentro de comillas (para manejar nombres con comas)
-                    const cols = linea.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-                    if (cols.length < 4) return null;
-                    const [cat, prod, tam, precio] = cols.map(c => c.replace(/"/g, '').trim());
+                    // Usamos la división simple por coma
+                    const cols = linea.split(',');
                     
-                    const precioLimpio = precio ? parseFloat(precio.replace(/[\r$]/g, '').trim()) : 0;
+                    if (cols.length < 4) return null;
+                    
+                    // Limpieza exhaustiva de cada columna (quita comillas, \r, $ y espacios extra)
+                    const [cat, prod, tam, precio] = cols.map(c => 
+                        c.replace(/"/g, '').replace(/[\r$]/g, '').trim()
+                    );
+                    
+                    // Conversión a número
+                    const precioLimpio = precio ? parseFloat(precio) : 0;
+                    
+                    if (!prod || !tam) return null; // Ignorar filas sin producto/tamaño
+
                     return {
                         id: `${prod} - ${tam}`,
                         categoria: cat, producto: prod, tamano: tam,
                         precio: precioLimpio
                     };
-                }).filter(p => p && p.producto && p.tamano);
+                }).filter(p => p); // Filtra los nulos
             }
             
             // --- RENDERIZADO DE VISTAS ---
@@ -229,6 +241,8 @@
                     (acc[p.categoria] = acc[p.categoria] || []).push(p);
                     return acc;
                 }, {});
+                
+                // Limpiamos el container y lo llenamos con productos
                 categoriasContainer.innerHTML = Object.keys(porCategoria).map(categoria => `
                     <div>
                         <h3 class="text-2xl font-bold border-b-2 border-red-700 pb-2 mb-4 text-slate-800">${categoria}</h3>
@@ -251,8 +265,8 @@
             function renderizarComanda() {
                 comandaVaciaEl.classList.toggle('hidden', comanda.length > 0);
                 btnImprimir.disabled = comanda.length === 0;
-                // Re-insertamos comandaVaciaEl si no hay items para mantener el placeholder.
-                comandaItemsContainer.innerHTML = comanda.length === 0 ? comandaVaciaEl.outerHTML : comanda.map((item, index) => `
+                
+                const itemsHtml = comanda.length === 0 ? '' : comanda.map((item, index) => `
                     <div class="flex justify-between items-center py-2 border-b border-slate-600 animate-fade-in">
                         <div>
                             <p class="font-semibold text-white">${item.producto} <span class="font-normal text-slate-300 text-sm">(${item.tamano})</span></p>
@@ -266,6 +280,9 @@
                         <p class="font-bold text-lg">$${(item.cantidad * item.precio).toFixed(2)}</p>
                     </div>
                 `).join('');
+                
+                comandaItemsContainer.innerHTML = itemsHtml || comandaVaciaEl.outerHTML;
+                
                 const total = comanda.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
                 comandaTotalEl.textContent = `$${total.toFixed(2)}`;
             }
@@ -286,7 +303,7 @@
             // --- MANEJO DE LA COMANDA ---
             window.agregarAComanda = id => {
                 const producto = productos.find(p => p.id === id);
-                if (!producto) return; // Por si acaso
+                if (!producto) return;
                 const itemExistente = comanda.find(item => item.id === id);
                 if (itemExistente) itemExistente.cantidad++;
                 else comanda.push({ ...producto, cantidad: 1 });
@@ -306,7 +323,7 @@
                 }
             });
 
-            // --- LÓGICA DE AGREGAR PRODUCTO NUEVO (MODIFICACIÓN) ---
+            // --- LÓGICA DE AGREGAR PRODUCTO NUEVO (Modal) ---
             btnAbrirModal.addEventListener('click', () => {
                 modalNuevoProducto.classList.remove('hidden');
                 feedbackNuevoProducto.innerHTML = '';
@@ -320,6 +337,7 @@
             formNuevoProducto.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
+                // Recolectar datos
                 const nuevoProductoData = {
                     categoria: a('nueva-categoria').value.trim(),
                     producto: a('nuevo-producto').value.trim(),
@@ -338,31 +356,36 @@
                 newProductIcon.className = 'fas fa-spinner btn-spinner';
                 feedbackNuevoProducto.innerHTML = `<p class="text-slate-600">Enviando producto...</p>`;
                 
-                // Los datos deben enviarse al Apps Script con una acción de 'agregar'
-                const payload = {
-                    action: 'agregar', // Asumimos que el Apps Script puede procesar este parámetro
-                    ...nuevoProductoData
-                };
+                // **USO DE URLSearchParams para Apps Script**
+                const payload = new URLSearchParams({
+                    action: 'agregar', 
+                    categoria: nuevoProductoData.categoria,
+                    producto: nuevoProductoData.producto,
+                    tamano: nuevoProductoData.tamano,
+                    precio: nuevoProductoData.precio
+                });
 
                 try {
-                    // El modo 'no-cors' es necesario para un fetch simple a Apps Script. No podremos leer la respuesta.
                     const response = await fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify(payload),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        mode: 'no-cors' 
+                        body: payload 
                     });
                     
-                    // Como estamos en 'no-cors', simplemente asumimos el éxito y esperamos.
-                    feedbackNuevoProducto.innerHTML = `<p class="text-green-600 font-bold">¡Producto agregado! Volviendo a la vista de pedidos para recargar la lista.</p>`;
-                    setTimeout(() => {
-                        modalNuevoProducto.classList.add('hidden');
-                        cambiarVista('pedidos'); // Volvemos a pedidos y se recarga la app
-                    }, 2500); 
+                    const result = await response.json();
+                    
+                    if (result.code >= 200 && result.code < 300) { // 201 Created
+                         feedbackNuevoProducto.innerHTML = `<p class="text-green-600 font-bold">${result.message} Volviendo a pedidos...</p>`;
+                         setTimeout(() => {
+                             modalNuevoProducto.classList.add('hidden');
+                             cambiarVista('pedidos'); // Recarga la lista
+                         }, 2500); 
+                    } else {
+                        throw new Error(result.message || 'Error desconocido del servidor');
+                    }
 
                 } catch (error) {
                     console.error('Error al agregar producto:', error);
-                    feedbackNuevoProducto.innerHTML = `<p class="text-red-600 font-bold">Hubo un error al guardar. Revisa la consola.</p>`;
+                    feedbackNuevoProducto.innerHTML = `<p class="text-red-600 font-bold">Error: ${error.message || 'Hubo un error al guardar.'}</p>`;
                     btnGuardarNuevoProducto.disabled = false;
                     newProductText.textContent = 'Agregar';
                     newProductIcon.className = 'fas fa-plus-circle';
@@ -380,7 +403,7 @@
                     id: input.dataset.productoId,
                     precio: parseFloat(input.value),
                     precioOriginal: parseFloat(input.dataset.precioOriginal)
-                })).filter(p => p.precio.toFixed(2) !== p.precioOriginal.toFixed(2)); // Comparación más segura
+                })).filter(p => p.precio.toFixed(2) !== p.precioOriginal.toFixed(2));
 
                 if (actualizaciones.length === 0) {
                     feedbackEl.innerHTML = `<p class="text-blue-600">No hay cambios para guardar.</p>`;
@@ -392,19 +415,22 @@
                 saveIcon.className = 'fas fa-spinner btn-spinner';
                 feedbackEl.innerHTML = `<p class="text-slate-600">Actualizando ${actualizaciones.length} producto(s)...</p>`;
                 
+                // Enviamos cada actualización por separado (con URLSearchParams)
                 const promesas = actualizaciones.map(p => 
                     fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify({ action: 'actualizar', id: p.id, precio: p.precio }), // Agregamos 'action: actualizar'
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        mode: 'no-cors' 
-                    })
+                        body: new URLSearchParams({ 
+                            action: 'actualizar', 
+                            id: p.id, 
+                            precio: p.precio 
+                        })
+                    }).then(res => res.json()) // Esperamos una respuesta JSON
                 );
 
                 try {
                     await Promise.all(promesas);
-                    feedbackEl.innerHTML = `<p class="text-green-600 font-bold">¡Precios actualizados con éxito! La página se recargará para reflejar los cambios.</p>`;
-                    setTimeout(() => cambiarVista('pedidos'), 2500); // Recarga para reflejar cambios
+                    feedbackEl.innerHTML = `<p class="text-green-600 font-bold">¡Precios actualizados con éxito! Volviendo a la vista de pedidos.</p>`;
+                    setTimeout(() => cambiarVista('pedidos'), 2500); 
                 } catch (error) {
                     console.error('Error al actualizar:', error);
                     feedbackEl.innerHTML = `<p class="text-red-600 font-bold">Hubo un error al guardar. Revisa la consola para más detalles.</p>`;
