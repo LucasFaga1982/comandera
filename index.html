@@ -33,11 +33,14 @@
             #ticket-imprimible .item-line, #ticket-imprimible .total-line { display: flex; justify-content: space-between; }
             #ticket-imprimible .total-line { border-top: 1px dashed #000; padding-top: 3px; margin-top: 5px; font-weight: bold; }
         }
+        /* Estilos del Modal */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
 
-    <!-- Vista Principal: Toma de Pedidos -->
     <main id="vista-pedidos" class="p-4 md:p-6">
         <header class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-300">
             <h1 class="text-4xl font-bold text-slate-900">Pizzería "Gourmet"</h1>
@@ -48,7 +51,6 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Columna de Productos -->
             <div id="lista-productos" class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                 <h2 class="text-3xl font-semibold mb-5">Menú</h2>
                 <div id="categorias-container" class="space-y-8">
@@ -59,7 +61,6 @@
                 </div>
             </div>
 
-            <!-- Columna de la Comanda -->
             <aside class="bg-slate-800 text-white p-6 rounded-xl shadow-lg flex flex-col">
                 <h2 class="text-3xl font-semibold mb-4">Comanda Actual</h2>
                 <div id="comanda-items" class="flex-grow min-h-[300px] border-b border-slate-600 pb-4 mb-4 overflow-y-auto">
@@ -82,20 +83,28 @@
         </div>
     </main>
 
-    <!-- Vista de Edición de Precios -->
     <section id="vista-precios" class="p-4 md:p-6 hidden">
         <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-300">
-            <h1 class="text-4xl font-bold text-slate-900">Editar Precios</h1>
+            <h1 class="text-4xl font-bold text-slate-900">Editar Precios y Productos</h1>
             <button id="btn-volver-a-pedidos" class="bg-slate-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-700 transition-all duration-300 shadow-md flex items-center gap-2">
                 <i class="fas fa-arrow-left"></i>
                 <span>Volver</span>
             </button>
         </header>
         <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
-            <div id="lista-precios-container" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                <h2 class="text-2xl font-semibold">Productos Existentes</h2>
+                <button id="btn-abrir-modal-nuevo-producto" class="bg-red-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition-all duration-300 shadow-md flex items-center gap-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Añadir Producto</span>
+                </button>
+            </div>
+            
+            <div id="lista-precios-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2"></div>
+
             <div id="feedback-precios" class="mt-4 text-center"></div>
             <div class="mt-6 text-right">
-                <button id="btn-guardar-precios" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-md flex items-center gap-2 disabled:bg-slate-500 disabled:cursor-not-allowed">
+                <button id="btn-guardar-precios" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-md flex items-center justify-center gap-2 disabled:bg-slate-500 disabled:cursor-not-allowed">
                     <i id="save-icon" class="fas fa-save"></i>
                     <span id="save-text">Guardar Cambios</span>
                 </button>
@@ -103,8 +112,39 @@
         </div>
     </section>
     
-    <!-- Contenedor para el ticket imprimible -->
     <div id="ticket-imprimible" class="hidden"></div>
+
+    <div id="modal-nuevo-producto" class="modal fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-4 border-b pb-2">Nuevo Producto</h3>
+            <form id="form-nuevo-producto" class="space-y-4">
+                <div>
+                    <label for="nueva-categoria" class="block text-sm font-medium text-slate-700">Categoría</label>
+                    <input type="text" id="nueva-categoria" required class="mt-1 block w-full p-2 border border-slate-300 rounded-md focus:ring-red-500 focus:border-red-500" placeholder="Ej: Pizza Clásica">
+                </div>
+                <div>
+                    <label for="nuevo-producto" class="block text-sm font-medium text-slate-700">Nombre del Producto</label>
+                    <input type="text" id="nuevo-producto" required class="mt-1 block w-full p-2 border border-slate-300 rounded-md focus:ring-red-500 focus:border-red-500" placeholder="Ej: Muzzarella">
+                </div>
+                <div>
+                    <label for="nuevo-tamano" class="block text-sm font-medium text-slate-700">Tamaño/Variante</label>
+                    <input type="text" id="nuevo-tamano" required class="mt-1 block w-full p-2 border border-slate-300 rounded-md focus:ring-red-500 focus:border-red-500" placeholder="Ej: Grande o Litro">
+                </div>
+                <div>
+                    <label for="nuevo-precio" class="block text-sm font-medium text-slate-700">Precio ($)</label>
+                    <input type="number" step="0.01" id="nuevo-precio" required class="mt-1 block w-full p-2 border border-slate-300 rounded-md focus:ring-red-500 focus:border-red-500" placeholder="Ej: 15.50">
+                </div>
+                <div id="feedback-nuevo-producto" class="text-center"></div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="btn-cerrar-modal" class="bg-slate-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-600 transition-all duration-300">Cancelar</button>
+                    <button type="submit" id="btn-guardar-nuevo-producto" class="bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all duration-300 flex items-center gap-2">
+                        <i id="new-product-icon" class="fas fa-plus-circle"></i>
+                        <span id="new-product-text">Agregar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -125,6 +165,15 @@
             const listaPreciosContainer = a('lista-precios-container'), btnImprimir = a('btn-imprimir');
             const btnLimpiar = a('btn-limpiar'), ticketImprimibleContainer = a('ticket-imprimible');
             const btnGuardarPrecios = a('btn-guardar-precios');
+            // Elementos del Nuevo Producto
+            const modalNuevoProducto = a('modal-nuevo-producto');
+            const btnAbrirModal = a('btn-abrir-modal-nuevo-producto');
+            const btnCerrarModal = a('btn-cerrar-modal');
+            const formNuevoProducto = a('form-nuevo-producto');
+            const feedbackNuevoProducto = a('feedback-nuevo-producto');
+            const btnGuardarNuevoProducto = a('btn-guardar-nuevo-producto');
+            const newProductIcon = a('new-product-icon');
+            const newProductText = a('new-product-text');
 
             // --- NAVEGACIÓN ---
             a('btn-ir-a-precios').addEventListener('click', () => cambiarVista('precios'));
@@ -138,6 +187,7 @@
                 } else {
                     vistaPrecios.classList.add('hidden');
                     vistaPedidos.classList.remove('hidden');
+                    // Al volver a pedidos, recargamos la lista para obtener los nuevos precios/productos
                     iniciarApp();
                 }
             }
@@ -159,13 +209,15 @@
 
             function parseCSV(text) {
                 return text.split('\n').slice(1).map(linea => {
-                    const cols = linea.split(',');
+                    // El regex busca una coma, a menos que esté dentro de comillas (para manejar nombres con comas)
+                    const cols = linea.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
                     if (cols.length < 4) return null;
-                    const [cat, prod, tam, precio] = cols;
+                    const [cat, prod, tam, precio] = cols.map(c => c.replace(/"/g, '').trim());
+                    
                     const precioLimpio = precio ? parseFloat(precio.replace(/[\r$]/g, '').trim()) : 0;
                     return {
-                        id: `${prod.trim()} - ${tam.trim()}`,
-                        categoria: cat.trim(), producto: prod.trim(), tamano: tam.trim(),
+                        id: `${prod} - ${tam}`,
+                        categoria: cat, producto: prod, tamano: tam,
                         precio: precioLimpio
                     };
                 }).filter(p => p && p.producto && p.tamano);
@@ -183,7 +235,7 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             ${porCategoria[categoria].map(p => `
                                 <button class="bg-slate-200 p-3 rounded-lg text-center hover:bg-red-700 hover:text-white transition-all duration-300 shadow focus:outline-none focus:ring-2 focus:ring-red-500 flex flex-col justify-between group"
-                                        onclick="agregarAComanda('${p.id}')">
+                                        onclick="agregarAComanda('${p.id.replace(/'/g, "\\'")}')">
                                     <div>
                                         <p class="font-semibold">${p.producto}</p>
                                         <p class="text-xs text-slate-600 group-hover:text-red-100">${p.tamano}</p>
@@ -199,6 +251,7 @@
             function renderizarComanda() {
                 comandaVaciaEl.classList.toggle('hidden', comanda.length > 0);
                 btnImprimir.disabled = comanda.length === 0;
+                // Re-insertamos comandaVaciaEl si no hay items para mantener el placeholder.
                 comandaItemsContainer.innerHTML = comanda.length === 0 ? comandaVaciaEl.outerHTML : comanda.map((item, index) => `
                     <div class="flex justify-between items-center py-2 border-b border-slate-600 animate-fade-in">
                         <div>
@@ -224,7 +277,7 @@
                         <div class="flex items-center">
                             <span class="mr-2 text-slate-500">$</span>
                             <input type="number" step="0.01" value="${p.precio.toFixed(2)}" data-producto-id="${p.id}" data-precio-original="${p.precio}"
-                                   class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500">
                         </div>
                     </div>
                 `).join('');
@@ -233,6 +286,7 @@
             // --- MANEJO DE LA COMANDA ---
             window.agregarAComanda = id => {
                 const producto = productos.find(p => p.id === id);
+                if (!producto) return; // Por si acaso
                 const itemExistente = comanda.find(item => item.id === id);
                 if (itemExistente) itemExistente.cantidad++;
                 else comanda.push({ ...producto, cantidad: 1 });
@@ -252,6 +306,69 @@
                 }
             });
 
+            // --- LÓGICA DE AGREGAR PRODUCTO NUEVO (MODIFICACIÓN) ---
+            btnAbrirModal.addEventListener('click', () => {
+                modalNuevoProducto.classList.remove('hidden');
+                feedbackNuevoProducto.innerHTML = '';
+                formNuevoProducto.reset(); // Limpiar el formulario
+            });
+
+            btnCerrarModal.addEventListener('click', () => {
+                modalNuevoProducto.classList.add('hidden');
+            });
+
+            formNuevoProducto.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const nuevoProductoData = {
+                    categoria: a('nueva-categoria').value.trim(),
+                    producto: a('nuevo-producto').value.trim(),
+                    tamano: a('nuevo-tamano').value.trim(),
+                    precio: parseFloat(a('nuevo-precio').value)
+                };
+
+                // Simple validación
+                if (!nuevoProductoData.categoria || !nuevoProductoData.producto || !nuevoProductoData.tamano || isNaN(nuevoProductoData.precio) || nuevoProductoData.precio <= 0) {
+                    feedbackNuevoProducto.innerHTML = `<p class="text-red-600">Por favor, completa todos los campos correctamente.</p>`;
+                    return;
+                }
+
+                btnGuardarNuevoProducto.disabled = true;
+                newProductText.textContent = 'Agregando...';
+                newProductIcon.className = 'fas fa-spinner btn-spinner';
+                feedbackNuevoProducto.innerHTML = `<p class="text-slate-600">Enviando producto...</p>`;
+                
+                // Los datos deben enviarse al Apps Script con una acción de 'agregar'
+                const payload = {
+                    action: 'agregar', // Asumimos que el Apps Script puede procesar este parámetro
+                    ...nuevoProductoData
+                };
+
+                try {
+                    // El modo 'no-cors' es necesario para un fetch simple a Apps Script. No podremos leer la respuesta.
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        mode: 'no-cors' 
+                    });
+                    
+                    // Como estamos en 'no-cors', simplemente asumimos el éxito y esperamos.
+                    feedbackNuevoProducto.innerHTML = `<p class="text-green-600 font-bold">¡Producto agregado! Volviendo a la vista de pedidos para recargar la lista.</p>`;
+                    setTimeout(() => {
+                        modalNuevoProducto.classList.add('hidden');
+                        cambiarVista('pedidos'); // Volvemos a pedidos y se recarga la app
+                    }, 2500); 
+
+                } catch (error) {
+                    console.error('Error al agregar producto:', error);
+                    feedbackNuevoProducto.innerHTML = `<p class="text-red-600 font-bold">Hubo un error al guardar. Revisa la consola.</p>`;
+                    btnGuardarNuevoProducto.disabled = false;
+                    newProductText.textContent = 'Agregar';
+                    newProductIcon.className = 'fas fa-plus-circle';
+                }
+            });
+
             // --- GUARDADO DE PRECIOS Y COMUNICACIÓN CON APPS SCRIPT ---
             btnGuardarPrecios.addEventListener('click', async () => {
                 const inputs = listaPreciosContainer.querySelectorAll('input[data-producto-id]');
@@ -263,7 +380,7 @@
                     id: input.dataset.productoId,
                     precio: parseFloat(input.value),
                     precioOriginal: parseFloat(input.dataset.precioOriginal)
-                })).filter(p => p.precio !== p.precioOriginal);
+                })).filter(p => p.precio.toFixed(2) !== p.precioOriginal.toFixed(2)); // Comparación más segura
 
                 if (actualizaciones.length === 0) {
                     feedbackEl.innerHTML = `<p class="text-blue-600">No hay cambios para guardar.</p>`;
@@ -275,20 +392,19 @@
                 saveIcon.className = 'fas fa-spinner btn-spinner';
                 feedbackEl.innerHTML = `<p class="text-slate-600">Actualizando ${actualizaciones.length} producto(s)...</p>`;
                 
-                // Se envían todas las actualizaciones en paralelo
                 const promesas = actualizaciones.map(p => 
                     fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify({ id: p.id, precio: p.precio }),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Necesario para evitar preflight
-                        mode: 'no-cors' // No podremos leer la respuesta, pero la acción se ejecutará
+                        body: JSON.stringify({ action: 'actualizar', id: p.id, precio: p.precio }), // Agregamos 'action: actualizar'
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        mode: 'no-cors' 
                     })
                 );
 
                 try {
                     await Promise.all(promesas);
                     feedbackEl.innerHTML = `<p class="text-green-600 font-bold">¡Precios actualizados con éxito! La página se recargará para reflejar los cambios.</p>`;
-                    setTimeout(() => cambiarVista('pedidos'), 2500); // Dar tiempo para leer el mensaje
+                    setTimeout(() => cambiarVista('pedidos'), 2500); // Recarga para reflejar cambios
                 } catch (error) {
                     console.error('Error al actualizar:', error);
                     feedbackEl.innerHTML = `<p class="text-red-600 font-bold">Hubo un error al guardar. Revisa la consola para más detalles.</p>`;
@@ -336,4 +452,3 @@
     </script>
 </body>
 </html>
-
