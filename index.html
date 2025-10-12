@@ -149,10 +149,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIGURACIÓN ---
-            // URL de publicación CSV de la hoja de cálculo (solo lectura)
-            const URL_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpTRK2Hf7YmhcCExgsz0-GNJjeLXN3LCPw2J3z0Tp5t_WQyny9vh4T5QWM6W9diJntg5yD3THw-LqP/pub?output=csv';
-            // URL del Google Apps Script (para POST/escritura)
-            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyk437BQbqBB5RrqgLQmPkDEEEES-aETvU3Scc6EaC8l9keeEdfU9aj2rJXAD5MRv5FVQ/exec';
+            // URL de publicación CSV de la hoja de cálculo (solo lectura). ¡ACTUALIZA ESTO!
+            const URL_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpTRK2Hf7YmhcCExgsz0-GNJjeLXN3LCPw2J3z0Tp5t_WQyny9vh4T5QWM6W9diJntg5yD3THw-LqP/pub?output=csv'; 
+            
+            // URL del Google Apps Script (para POST/escritura) - ¡ACTUALIZADO A TU ENLACE!
+            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTPjS2MB6JgiCKA5qLePfOHMcEah72AAOmUKhsgc3UEZRmq3UXEekj8sVbAMPebWF9xw/exec';
 
             // Estado de la aplicación
             let productos = [];
@@ -385,7 +386,7 @@
 
                 } catch (error) {
                     console.error('Error al agregar producto:', error);
-                    feedbackNuevoProducto.innerHTML = `<p class="text-red-600 font-bold">Error: ${error.message || 'Hubo un error al guardar.'}</p>`;
+                    feedbackNuevoProducto.innerHTML = `<p class="text-red-600 font-bold">Error: ${error.message || 'Hubo un error al guardar. Asegúrate de que el Apps Script esté configurado para leer "e.parameter" y esté DEPLOYADO correctamente.'}</p>`;
                     btnGuardarNuevoProducto.disabled = false;
                     newProductText.textContent = 'Agregar';
                     newProductIcon.className = 'fas fa-plus-circle';
