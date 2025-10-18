@@ -9,8 +9,12 @@
          --brand:#00a86b; --muted:#9aa1aa; --shadow:0 12px 28px rgba(0,0,0,.35); --radius:18px; }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:radial-gradient(1200px 1200px at 20% 10%, #151922 0%, #0d0f14 45%, #0a0c10 100%);
-       color:#eef1f4;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif}
+  /* 👉 Nunca colapsa a 1 columna; PC first */
+  body{
+    margin:0; min-width:1100px; /* fuerza 2 columnas en PC: si falta ancho, scroll horizontal */
+    background:radial-gradient(1200px 1200px at 20% 10%, #151922 0%, #0d0f14 45%, #0a0c10 100%);
+    color:#eef1f4;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif
+  }
 
   /* Topbar */
   .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -31,7 +35,7 @@
   .chip{border:1px solid #22304a;background:#0e131c;color:#e9eef4;padding:8px 10px;border-radius:999px;cursor:pointer}
   .chip.active{border-color:var(--brand);color:#fff}
 
-  /* Layout: SIEMPRE 2 columnas (PC) */
+  /* Layout: SIEMPRE 2 columnas */
   .wrap{display:grid;grid-template-columns:3fr 1.15fr;gap:18px;max-width:1400px;margin:16px auto;padding:16px}
   .left{min-height:70vh;background:var(--panel);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
   .right{position:sticky;top:76px;align-self:start;background:var(--panel);border-radius:var(--radius);
@@ -168,7 +172,6 @@
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-danger" id="clearBtn">Vaciar</button>
-        <!-- Se quitó GUARDAR -->
         <button class="btn" id="printBtn">Imprimir</button>
       </div>
       <div class="small">* Imprimir guarda/actualiza el pedido y limpia la comanda.</div>
@@ -211,8 +214,11 @@
       </div>
     </section>
     <aside class="right">
-      <div class="order-title">Detalle</div>
-      <div class="small">Seleccioná una fila para ver/imprimir desde el navegador.</div>
+      <div class="order-title">Acciones</div>
+      <div class="small">Podés limpiar el historial de cierres sin afectar los pedidos del día actual.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <button class="btn btn-danger" id="btnLimpiarDias">Limpiar DÍAS</button>
+      </div>
     </aside>
   </main>
 
@@ -246,7 +252,7 @@
   let byCategory = [];
   let cart = [];
   let currentItem = null;
-  let currentEditingId = null; // ID cuando reeditás
+  let currentEditingId = null;
 
   // localStorage keys
   const LS_CART   = "pgl_cart";
@@ -293,7 +299,7 @@
       const key=r.producto.trim();
       if(!byName.has(key)) byName.set(key,{producto:key,categoria:r.categoria||"",variantes:[]});
       byName.get(key).variantes.push({tamano:r.tamano||"",precio:Number(r.precio)||0,categoria:r.categoria||""});
-    }
+      }
     const list=[...byName.values()];
     list.forEach(p=>p.variantes.sort((a,b)=>(a.precio||0)-(b.precio||0)));
     list.sort((a,b)=>a.producto.localeCompare(b.producto,'es'));
@@ -439,7 +445,6 @@
       total
     };
   }
-
   function upsertOrder(order){
     const all=getOrders();
     const idx=all.findIndex(o=>o.id===order.id);
@@ -464,7 +469,7 @@
     window.print();
     document.querySelector(".right").classList.remove("ticket");
 
-    // LIMPIAR panel (como pediste)
+    // LIMPIAR panel luego de imprimir
     cart=[]; $("#addr").value=""; $("#time").value=""; currentEditingId=null;
     renderCart(); refreshOrderIdBadge(); persistCart();
   });
@@ -543,7 +548,7 @@
         }
 
         if(act==="print"){
-          // Cargar y usar flujo de impresión del panel derecho (manteniendo ID)
+          // Cargar y usar impresión (manteniendo ID) y limpiar panel después
           cart=o.items; $("#addr").value=o.address||""; $("#time").value=o.delivery||"";
           currentEditingId=o.id; refreshOrderIdBadge(); renderCart(); persistCart();
 
@@ -553,7 +558,6 @@
           window.print();
           document.querySelector(".right").classList.remove("ticket");
 
-          // Limpiar panel luego de imprimir (pero el pedido queda en Resumen)
           cart=[]; $("#addr").value=""; $("#time").value=""; currentEditingId=null;
           renderCart(); refreshOrderIdBadge(); persistCart();
           return;
@@ -612,6 +616,7 @@
     alert("Día finalizado: resumen guardado y pedidos del día borrados.");
   });
 
+  // ====== Días (limpiar historial) ======
   function renderDaysTable(){
     const tb=$("#daysTable tbody"); tb.innerHTML="";
     const days=getDays();
@@ -622,6 +627,13 @@
       tb.appendChild(tr);
     });
   }
+  $("#btnLimpiarDias").addEventListener("click", ()=>{
+    if(confirm("¿Vaciar historial de DÍAS? Esta acción no se puede deshacer.")){
+      localStorage.setItem(LS_DAYS, JSON.stringify([]));
+      renderDaysTable();
+      alert("Historial de DÍAS limpiado.");
+    }
+  });
 
   // ====== NAV ======
   function showView(id){
