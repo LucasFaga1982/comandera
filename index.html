@@ -85,8 +85,7 @@
     .row select, .row input{flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#0a1436; color:var(--text)}
 
     /* Vistas */
-    [data-view]{display:none}
-    [data-view].active{display:block}
+    
 
     /* Editor de precios */
     .editor{ padding:18px; }
@@ -116,7 +115,7 @@
     </div>
     <div class="actions">
       <button class="btn ghost" id="reloadBtn" title="Recargar catálogo">↻ Recargar</button>
-      <button class="btn btn-edit" id="toggleEditor">Editar precios</button>
+      <button class="btn btn-edit" id="toggleEditor">Editar precios en DF</button>
     </div>
   </header>
 
@@ -145,18 +144,6 @@
         <button class="btn" id="printBtn">🖨️ Imprimir</button>
       </div>
     </aside>
-
-    <!-- Editor de Precios -->
-    <section class="panel editor" data-view="#precios">
-      <h3>Editor de precios</h3>
-      <p class="print-hint">Modificá precios en línea. Para agregar productos nuevos: <a id="dbLink" href="#" target="_blank">dirigite a la base de datos</a>.</p>
-      <div class="list" id="priceList"></div>
-      <div class="editor-actions">
-        <button class="btn" id="savePrices">Guardar cambios</button>
-        <button class="btn ghost" id="backPos">Volver a comandas</button>
-      </div>
-      <div id="saveStatus" class="print-hint"></div>
-    </section>
   </main>
 
   <!-- Modal Selección -->
@@ -176,8 +163,10 @@
 
   <script>
     // ======= CONFIG =======
-    const DB_URL = "https://script.google.com/macros/s/AKfycbzD7mn33jI9rPVzmo4n-ZhaKHIgvNvmFy90KjXrUn_o-jKSfdywUx8lBytFbxTAfvDk8A/exec"; // listado
-    const DB_URL_EDIT = DB_URL;   // mismo endpoint para POST (deberás habilitar en Apps Script)
+    const SHEET_ID = "1vq34RVaka0N-5kX6BNXQzVrcjRKPvASZ1xJU4K6tg8M";
+    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+    const DB_URL = "https://script.google.com/macros/s/AKfycbzD7mn33jI9rPVzmo4n-ZhaKHIgvNvmFy90KjXrUn_o-jKSfdywUx8lBytFbxTAfvDk8A/exec"; // WebApp que lee por SHEET_ID en el backend
+    const DB_URL_EDIT = DB_URL; // (sin uso si editás precios directo en Sheets)
 
     // ======= ESTADO =======
     let rawRows = [];       // filas crudas: {categoria, producto, tamano, precio}
@@ -188,7 +177,7 @@
     // ======= UTILS =======
     const peso = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n||0);
     const keyOf = (r)=> `${r.categoria}__${r.producto}__${r.tamano}`;
-    const $(id)=>document.getElementById(id);
+    // helper definido más abajo
   </script>
   <script>
     // Fallback for the short helper (since HTML validators may complain)
@@ -317,41 +306,13 @@
     }
 
     // ============ Editor de precios ============
-    function showView(hash){
-      const pos = document.querySelector('[data-view="#pos"]');
-      const ed  = document.querySelector('[data-view="#precios"]');
-      if(hash==="#precios"){ ed.classList.add('active'); pos.classList.remove('active'); }
-      else { pos.classList.add('active'); ed.classList.remove('active'); }
+          else { pos.classList.add('active'); ed.classList.remove('active'); }
     }
 
-    function renderEditor(){
-      const wrap = $('priceList');
-      wrap.innerHTML='';
-      // mostrar cada variante como fila editable
-      for(const v of catalog){
-        const row = document.createElement('div'); row.className='row-edit'; row.dataset.id=v.id;
-        const title = document.createElement('div');
-        title.innerHTML = `<strong>${v.producto}</strong> <span class="meta">${v.tamano?`(${v.tamano})`:''}</span>`;
-        const cat = document.createElement('div'); cat.className='meta'; cat.textContent = v.categoria||'';
-        const price = document.createElement('input'); price.type='number'; price.step='1'; price.min='0'; price.value = v.precio; price.dataset.orig=v.precio;
-        const now  = document.createElement('div'); now.className='meta'; now.textContent = peso(v.precio);
-        row.append(title, cat, price, now);
-        wrap.appendChild(row);
-      }
-      $('dbLink').href = DB_URL; // abre base
+          $('dbLink').href = SHEET_URL; // abre la hoja directamente
     }
 
-    async function saveEditor(){
-      const rows = [...document.querySelectorAll('.row-edit')];
-      const updates = [];
-      for(const r of rows){
-        const id = r.dataset.id; const priceInput = r.querySelector('input');
-        const newPrice = Number(priceInput.value||0);
-        const v = catalog.find(x=>x.id===id);
-        if(v && newPrice !== v.precio){
-          updates.push({ categoria:v.categoria, producto:v.producto, tamano:v.tamano, precio:newPrice });
-        }
-      }
+          }
       if(updates.length===0){ $('saveStatus').textContent='No hay cambios.'; return; }
       $('saveStatus').textContent='Guardando cambios…';
       try{
@@ -383,11 +344,11 @@
     }
 
     // Eventos UI
-    window.addEventListener('hashchange', ()=> showView(location.hash||'#pos'));
+    
     $('toggleEditor').addEventListener('click', ()=>{
-      if(location.hash==="#precios") location.hash = '#pos'; else location.hash = '#precios';
+      window.open(SHEET_URL, '_blank'); // llevar directamente a la base de datos
     });
-    $('backPos').addEventListener('click', ()=>{ location.hash='#pos'; });
+    
     $('reloadBtn').addEventListener('click', loadAll);
     $('q').addEventListener('input', (e)=> renderCards(e.target.value));
     $('clearOrder').addEventListener('click', ()=>{ order=[]; renderOrder(); });
@@ -401,5 +362,7 @@
     restoreOrder();
     loadAll().catch(err=>{ console.error(err); alert('No se pudo cargar la base. Ver consola.'); });
   </script>
+
+  
 </body>
 </html>
