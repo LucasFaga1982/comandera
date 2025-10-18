@@ -12,90 +12,118 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:radial-gradient(1200px 1200px at 20% 10%, #151922 0%, #0d0f14 45%, #0a0c10 100%);
-       color:#eef1f4;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif}
-  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;
-          padding:10px 14px;background:#0b0e13e6;border-bottom:1px solid #1d232f;backdrop-filter: blur(6px)}
-  .brand{display:flex;align-items:center;gap:12px}
-  .brand img{width:44px;height:44px;border-radius:999px;background:#fff;object-fit:cover;box-shadow:var(--shadow)}
-  .brand .title{font-weight:800;letter-spacing:.3px}
-  .brand .subtitle{font-size:12px;color:#c9ced6}
-  .actions{display:flex;gap:8px}
-  .btn{border:1px solid #253042;background:#151a23;color:#eaf0f6;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;box-shadow:var(--shadow)}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 1200px at 20% 10%, #151922 0%, #0d0f14 45%, #0a0c10 100%);
+    color:#eef1f4; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif
+  }
+
+  /* Top bar */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 14px; background:#0b0e13e6; border-bottom:1px solid #1d232f; backdrop-filter: blur(6px)
+  }
+  .brand{display:flex; align-items:center; gap:12px; cursor:pointer}
+  .brand img{width:44px; height:44px; border-radius:999px; background:#fff; object-fit:cover; box-shadow:var(--shadow)}
+  .brand .title{font-weight:800; letter-spacing:.3px}
+  .brand .subtitle{font-size:12px; color:#c9ced6}
+  .actions{display:flex; gap:8px; flex-wrap:wrap}
+  .btn{
+    border:1px solid #253042; background:#151a23; color:#eaf0f6;
+    padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700; box-shadow:var(--shadow)
+  }
   .btn:hover{border-color:#334359}
-  .btn-brand{background:linear-gradient(135deg,var(--brand),#0e7f56);border:none;color:#fff}
-  .btn-danger{background:#742323;border:1px solid #9f2a2a;color:#ffd9d9}
-  .btn-ghost{background:transparent;border:1px dashed #374151}
+  .btn-brand{background:linear-gradient(135deg,var(--brand),#0e7f56); border:none; color:#fff}
+  .btn-danger{background:#742323; border:1px solid #9f2a2a; color:#ffd9d9}
+  .btn-ghost{background:transparent; border:1px dashed #374151}
 
-  /* Nav interno (Pedidos / Resumen / Días) */
-  .subnav{display:flex;gap:8px;margin:8px 16px 0}
-  .chip{border:1px solid #22304a;background:#0e131c;color:#e9eef4;padding:8px 10px;border-radius:999px;cursor:pointer}
-  .chip.active{border-color:var(--brand);color:#fff}
+  /* Subnav (Resumen/Días) */
+  .subnav{display:flex; gap:8px; margin:8px 16px 0}
+  .chip{border:1px solid #22304a; background:#0e131c; color:#e9eef4; padding:8px 10px; border-radius:999px; cursor:pointer}
+  .chip.active{border-color:var(--brand); color:#fff}
 
-  .wrap{display:grid;grid-template-columns:3fr 1.15fr;gap:18px;max-width:1400px;margin:16px auto;padding:16px}
-  .left{min-height:70vh;background:var(--panel);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-  .right{position:sticky;top:76px;align-self:start;background:var(--panel);border-radius:var(--radius);
-         padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 100px)}
-  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-  .search{flex:1;background:#0e131c;border:1px solid #22304a;color:#e9eef4;padding:10px 12px;border-radius:12px;outline:none}
-  .badge{font-size:12px;color:#b8bfca}
+  /* Layout: SIEMPRE dos columnas (PC) */
+  .wrap{
+    display:grid; grid-template-columns: 3fr 1.15fr; gap:18px;
+    max-width:1400px; margin:16px auto; padding:16px
+  }
+  .left{min-height:70vh; background:var(--panel); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow)}
+  .right{
+    position:sticky; top:76px; align-self:start;
+    background:var(--panel); border-radius:var(--radius);
+    padding:18px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:12px; max-height: calc(100vh - 100px)
+  }
 
-  /* Categorías + grid */
-  .category{margin:12px 0 18px;border:1px solid #1f2838;border-radius:16px;background:#0e1219}
-  .cat-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #1f2838;background:linear-gradient(180deg,#0f141e,#0e1219);border-top-left-radius:16px;border-top-right-radius:16px}
-  .cat-name{font-weight:800;letter-spacing:.3px}
-  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:12px}
-  @media (max-width:1200px){.grid{grid-template-columns:repeat(3,1fr)}}
-  @media (max-width:1000px){.wrap{grid-template-columns:1fr}.right{position:relative;top:0}}
-  @media (max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}}
+  /* Buscador */
+  .toolbar{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+  .search{flex:1; background:#0e131c; border:1px solid #22304a; color:#e9eef4; padding:10px 12px; border-radius:12px; outline:none}
+  .badge{font-size:12px; color:#b8bfca}
 
-  /* Card solo nombre (alto contraste) */
-  .card{background:var(--card);color:var(--ink);border:2px solid #e2e5e9;border-radius:18px;padding:18px;cursor:pointer;min-height:84px;
-        display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;letter-spacing:.2px;text-transform:uppercase;
-        box-shadow:0 6px 14px rgba(0,0,0,.15);transition:transform .08s ease, box-shadow .15s ease, border-color .15s ease}
-  .card:hover{transform:translateY(-2px);border-color:var(--brand);box-shadow:0 10px 24px rgba(0,0,0,.25)}
-  .card:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+  /* Categorías y tarjetas */
+  .category{margin:12px 0 18px; border:1px solid #1f2838; border-radius:16px; background:#0e1219}
+  .cat-head{
+    display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
+    border-bottom:1px solid #1f2838; background:linear-gradient(180deg,#0f141e,#0e1219);
+    border-top-left-radius:16px; border-top-right-radius:16px
+  }
+  .cat-name{font-weight:800; letter-spacing:.3px}
+  .grid{display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; padding:12px}
 
-  /* Panel comanda */
-  .order-title{font-weight:900;font-size:20px;letter-spacing:.6px}
-  .order-list{display:flex;flex-direction:column;gap:10px;overflow:auto;padding-right:2px}
-  .line{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;background:#0b1018;border:1px solid #213045;border-radius:12px;padding:10px 12px}
-  .line h4{margin:0;font-size:14px}
-  .line .muted{color:#93a0b2;font-size:12px}
-  .qty{display:flex;align-items:center;gap:6px;background:#0a0f17;border:1px solid #253144;border-radius:10px;padding:4px 6px}
-  .qty button{background:transparent;color:#e9eef4;border:none;font-size:16px;cursor:pointer}
-  .price{min-width:88px;text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
-  .remove{background:transparent;border:none;color:#f3a3a3;cursor:pointer;margin-left:6px}
-  .totals{margin-top:6px;border-top:1px dashed #344055;padding-top:10px;display:flex;justify-content:space-between;align-items:center}
-  .total{font-size:18px;font-weight:900;color:var(--brand)}
-  .small{font-size:12px;color:#b7bfca}
+  .card{
+    background:var(--card); color:var(--ink); border:2px solid #e2e5e9;
+    border-radius:18px; padding:18px; cursor:pointer; min-height:84px;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-weight:900; letter-spacing:.2px; text-transform:uppercase;
+    box-shadow:0 6px 14px rgba(0,0,0,.15);
+    transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease
+  }
+  .card:hover{ transform: translateY(-2px); border-color: var(--brand); box-shadow:0 10px 24px rgba(0,0,0,.25) }
+  .card:focus-visible{ outline:3px solid var(--brand); outline-offset:2px }
 
-  /* Campos extra (Dirección / Horario) */
-  .field{display:flex;flex-direction:column;gap:6px}
-  .in{background:#0e131c;border:1px solid #22304a;color:#e9eef4;padding:8px 10px;border-radius:10px;outline:none}
+  /* Comanda */
+  .order-title{font-weight:900; font-size:20px; letter-spacing:.6px}
+  .order-list{display:flex; flex-direction:column; gap:10px; overflow:auto; padding-right:2px}
+  .line{
+    display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:center;
+    background:#0b1018; border:1px solid #213045; border-radius:12px; padding:10px 12px
+  }
+  .line h4{margin:0; font-size:14px}
+  .line .muted{color:#93a0b2; font-size:12px}
+  .qty{display:flex; align-items:center; gap:6px; background:#0a0f17; border:1px solid #253144; border-radius:10px; padding:4px 6px}
+  .qty button{background:transparent; color:#e9eef4; border:none; font-size:16px; cursor:pointer}
+  .price{min-width:88px; text-align:right; font-variant-numeric: tabular-nums; font-weight:800}
+  .remove{background:transparent; border:none; color:#f3a3a3; cursor:pointer; margin-left:6px}
+  .totals{margin-top:6px; border-top:1px dashed #344055; padding-top:10px; display:flex; justify-content:space-between; align-items:center}
+  .total{font-size:18px; font-weight:900; color:var(--brand)}
+  .small{font-size:12px; color:#b7bfca}
+
+  /* Campos extra (Dirección / Horario) AHORA ABAJO DE LA LISTA */
+  .field{display:flex; flex-direction:column; gap:6px}
+  .in{background:#0e131c; border:1px solid #22304a; color:#e9eef4; padding:8px 10px; border-radius:10px; outline:none}
 
   /* Modal tamaños */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:60;padding:16px}
+  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.5); z-index:60; padding:16px}
   .modal.open{display:flex}
-  .modal-card{width:min(560px,96vw);background:#0f141d;border:1px solid #233149;border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
-  .modal .title{font-size:18px;font-weight:900}
-  .size-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  @media (max-width:480px){.size-grid{grid-template-columns:1fr}}
-  .size-btn{border:2px solid #2a3a52;background:#0b1018;color:#e9eef4;padding:12px;border-radius:12px;cursor:pointer;text-align:center;font-weight:800}
-  .size-btn strong{display:block;color:var(--brand);font-size:13px;margin-top:4px}
+  .modal-card{width:min(560px,96vw); background:#0f141d; border:1px solid #233149; border-radius:18px; padding:18px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:12px}
+  .modal .title{font-size:18px; font-weight:900}
+  .size-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+  .size-btn{border:2px solid #2a3a52; background:#0b1018; color:#e9eef4; padding:12px; border-radius:12px; cursor:pointer; text-align:center; font-weight:800}
+  .size-btn strong{display:block; color:var(--brand); font-size:13px; margin-top:4px}
   .size-btn:hover{border-color:var(--brand)}
-  .qty-row{display:flex;align-items:center;gap:10px;margin-top:4px}
-  .qty-box{display:flex;align-items:center;gap:6px;background:#0a0f17;border:1px solid #253144;border-radius:10px;padding:6px 8px}
-  .qty-box input{width:64px;background:transparent;border:none;color:#e9eef4;font-weight:700;text-align:center;outline:none}
-  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+  .qty-row{display:flex; align-items:center; gap:10px; margin-top:4px}
+  .qty-box{display:flex; align-items:center; gap:6px; background:#0a0f17; border:1px solid #253144; border-radius:10px; padding:6px 8px}
+  .qty-box input{width:64px; background:transparent; border:none; color:#e9eef4; font-weight:700; text-align:center; outline:none}
+  .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:4px}
 
   /* Vistas */
   .view{display:none}
   .view.active{display:block}
 
-  /* Tabla Resumen */
-  table{width:100%;border-collapse:collapse}
-  th,td{border-bottom:1px solid #22304a;padding:8px;text-align:left;font-size:14px}
+  /* Tabla */
+  table{width:100%; border-collapse:collapse}
+  th,td{border-bottom:1px solid #22304a; padding:8px; text-align:left; font-size:14px}
   th{color:#cfd6df}
   tr:hover td{background:#0e131c}
 
@@ -103,10 +131,10 @@
   @media print{
     body{background:#fff}
     .topbar,.left,.btn,.toolbar,.subnav{display:none !important}
-    .right{position:static;box-shadow:none;border:none;padding:0;margin:0;width:100%}
-    .ticket{width:72mm;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:#000;background:#fff}
+    .right{position:static; box-shadow:none; border:none; padding:0; margin:0; width:100%}
+    .ticket{width:72mm; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace; color:#000; background:#fff}
     .ticket h2{margin:0 0 6px}
-    .line{border:none;background:#fff;padding:4px 0}
+    .line{border:none; background:#fff; padding:4px 0}
     .remove,.qty{display:none}
     .totals{border-top:1px solid #000}
   }
@@ -114,7 +142,7 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand" style="cursor:pointer" id="navPedidos">
+    <div class="brand" id="navPedidos">
       <img src="logo.png" alt="Logo Pizza Gourmet Longchamps">
       <div>
         <div class="title">Pizza Gourmet Longchamps</div>
@@ -122,19 +150,20 @@
       </div>
     </div>
     <div class="actions">
+      <button class="btn" id="btnHome" title="Volver al menú principal">Menú principal</button>
       <a class="btn btn-brand" id="editLink" href="#" target="_blank" rel="noopener">Editar precios</a>
       <button class="btn" id="reloadBtn" title="Recargar datos">&#x21bb; Recargar</button>
       <button class="btn" id="btnResumen" title="Resumen del día">Resumen</button>
     </div>
   </header>
 
-  <!-- NAV interno (solo visible en Resumen/Días) -->
+  <!-- Subnav (solo en Resumen/Días) -->
   <div class="subnav" id="subnav" style="display:none">
     <button class="chip active" id="tabResumen">Pedidos del día</button>
     <button class="chip" id="tabDias">Días</button>
   </div>
 
-  <!-- VISTA 1: PEDIDOS -->
+  <!-- VISTA: PEDIDOS -->
   <main class="wrap view active" id="viewPedidos">
     <section class="left">
       <div class="toolbar">
@@ -147,6 +176,16 @@
 
     <aside class="right">
       <div class="order-title">Comanda</div>
+      <div class="small">Click en un producto para añadirlo. Ajustá cantidades en la lista.</div>
+
+      <div id="orderList" class="order-list"></div>
+
+      <div class="totals">
+        <span>Total</span>
+        <span id="total" class="total">$ 0,00</span>
+      </div>
+
+      <!-- AHORA los campos extra van DESPUÉS de la lista + total -->
       <div class="field">
         <label for="addr" class="small">Dirección</label>
         <input id="addr" class="in" type="text" placeholder="Calle y número, piso, etc." />
@@ -154,14 +193,6 @@
       <div class="field">
         <label for="time" class="small">Horario de entrega</label>
         <input id="time" class="in" type="time" />
-      </div>
-
-      <div class="small">Click en un producto para añadirlo. Ajustá cantidades en la lista.</div>
-      <div id="orderList" class="order-list"></div>
-
-      <div class="totals">
-        <span>Total</span>
-        <span id="total" class="total">$ 0,00</span>
       </div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -173,11 +204,11 @@
     </aside>
   </main>
 
-  <!-- VISTA 2: RESUMEN -->
+  <!-- VISTA: RESUMEN -->
   <main class="wrap view" id="viewResumen">
     <section class="left">
       <h3 style="margin:0 0 10px">Pedidos del día</h3>
-      <div class="small" id="resumenHint">Editá Dirección u Horario y presioná “💾”.</div>
+      <div class="small">Editá Dirección u Horario y presioná “💾”.</div>
       <div style="overflow:auto">
         <table id="ordersTable">
           <thead>
@@ -197,11 +228,11 @@
         <button class="btn" id="btnRecalc">Recalcular</button>
         <button class="btn btn-brand" id="btnFinalizarDia">Finalizar DIA</button>
       </div>
-      <div class="small">“Finalizar DIA” imprime el resumen y lo agrega a la pestaña Días.</div>
+      <div class="small">“Finalizar DIA” imprime, guarda el cierre y borra los pedidos de hoy.</div>
     </aside>
   </main>
 
-  <!-- VISTA 3: DÍAS -->
+  <!-- VISTA: DÍAS -->
   <main class="wrap view" id="viewDias">
     <section class="left">
       <h3 style="margin:0 0 10px">Cierres registrados</h3>
@@ -400,7 +431,7 @@
   }
   function getOrders(){ try{ return JSON.parse(localStorage.getItem(LS_ORDERS)||"[]"); }catch{ return []; } }
   function setOrders(arr){ localStorage.setItem(LS_ORDERS, JSON.stringify(arr)); }
-  function getDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"[][]"); }catch{ return []; } }
+  function getDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"[]"); }catch{ return []; } }
   function setDays(arr){ localStorage.setItem(LS_DAYS, JSON.stringify(arr)); }
 
   // ====== FETCH SHEET ======
@@ -428,7 +459,7 @@
     renderCategories(filtered);
   });
 
-  // ====== GUARDAR / IMPRIMIR COMANDA ======
+  // ====== ORDEN / IMPRESIÓN ======
   function buildOrderFromUI(){
     const total=cart.reduce((acc,it)=>acc+it.cantidad*it.precio,0);
     return {
@@ -456,16 +487,17 @@
   });
 
   $("#printBtn").addEventListener("click",()=>{
-    let o=buildOrderFromUI(); // para imprimir la vista actual
-    // Guardar también
-    const saved=saveCurrentOrder();
+    saveCurrentOrder(); // guarda
     document.querySelector(".right").classList.add("ticket");
     window.print();
     setTimeout(()=> document.querySelector(".right").classList.remove("ticket"),0);
   });
 
   $("#clearBtn").addEventListener("click",()=>{
-    if(confirm("¿Vaciar comanda?")){ cart=[]; $("#addr").value=""; $("#time").value=""; renderCart(); persistCart(); }
+    if(confirm("¿Vaciar comanda?")){
+      cart=[]; $("#addr").value=""; $("#time").value="";
+      renderCart(); persistCart();
+    }
   });
 
   // ====== RESUMEN DEL DÍA ======
@@ -476,9 +508,9 @@
   }
   function aggregateProducts(orders){
     const map=new Map(); // key = producto|tamano
-    let total=0, lines=0;
+    let total=0;
     for(const o of orders){
-      total+=o.total; lines+=o.items.length;
+      total+=o.total;
       for(const it of o.items){
         const k=it.producto+"|"+(it.tamano||"");
         const prev=map.get(k)||{producto:it.producto,tamano:it.tamano||"",cantidad:0,importe:0};
@@ -487,8 +519,9 @@
         map.set(k,prev);
       }
     }
-    return { products:[...map.values()], total, lines };
+    return { products:[...map.values()], total };
   }
+
   function renderOrdersTable(){
     const tb=$("#ordersTable tbody"); tb.innerHTML="";
     const list=ordersOfToday();
@@ -512,17 +545,24 @@
     tb.querySelectorAll('input.in').forEach(inp=>{
       inp.addEventListener('change', (e)=>{
         const i=+e.target.dataset.i, k=e.target.dataset.k;
-        const orders=getOrders(); orders[i][k]=e.target.value; setOrders(orders);
+        const orders=getOrders(); const todays=ordersOfToday();
+        const all=getOrders();
+        const idxGlobal=all.findIndex(x=> x.id===todays[i].id);
+        all[idxGlobal][k]=e.target.value; setOrders(all);
       });
     });
+
     tb.querySelectorAll('button[data-act]').forEach(btn=>{
       btn.addEventListener('click',(e)=>{
         const act=e.currentTarget.dataset.act; const i=+e.currentTarget.dataset.i;
-        const orders=getOrders();
-        if(act==="save"){ setOrders(orders); alert("Pedido actualizado."); }
+        const todays=ordersOfToday();
+        const all=getOrders();
+        const idxGlobal=all.findIndex(x=> x.id===todays[i].id);
+        if(idxGlobal<0) return;
+
+        if(act==="save"){ setOrders(all); alert("Pedido actualizado."); }
         if(act==="print"){
-          // Carga temporal en el panel derecho para imprimir como ticket
-          const o=orders[i];
+          const o=all[idxGlobal];
           cart=o.items; $("#addr").value=o.address||""; $("#time").value=o.delivery||"";
           renderCart();
           document.querySelector(".right").classList.add("ticket");
@@ -530,7 +570,9 @@
           setTimeout(()=> document.querySelector(".right").classList.remove("ticket"),0);
         }
         if(act==="del"){
-          if(confirm("¿Eliminar pedido?")){ orders.splice(i,1); setOrders(orders); renderOrdersTable(); renderSummaryBox(); }
+          if(confirm("¿Eliminar pedido?")){
+            all.splice(idxGlobal,1); setOrders(all); renderOrdersTable(); renderSummaryBox();
+          }
         }
       });
     });
@@ -555,31 +597,39 @@
 
   $("#btnRecalc").addEventListener("click", renderSummaryBox);
 
+  // === FINALIZAR DIA: imprime, guarda cierre y BORRA pedidos de hoy ===
   $("#btnFinalizarDia").addEventListener("click", ()=>{
-    const list=ordersOfToday();
-    if(!list.length){ alert("No hay pedidos para cerrar hoy."); return; }
-    const {products,total}=aggregateProducts(list);
+    const todays = ordersOfToday();
+    if(!todays.length){ alert("No hay pedidos para cerrar hoy."); return; }
+
+    const {products,total}=aggregateProducts(todays);
+
     // Guardar en DÍAS
     const days=getDays();
-    days.push({ date: todayStr(), orders: list.length, total, products, savedAt: new Date().toISOString() });
+    days.push({ date: todayStr(), orders: todays.length, total, products, savedAt: new Date().toISOString() });
     setDays(days);
-    renderDaysTable();
 
-    // Imprimir resumen (usamos panel derecho como ticket grande)
-    const backup=$("#orderList").innerHTML;
+    // Imprimir resumen
     const aside=$(".right");
-    const tmp=document.createElement("div");
-    tmp.innerHTML=`<h2>Resumen del día ${todayStr()}</h2>
-      <div>Pedidos: ${list.length}</div>
+    const prevHTML=aside.innerHTML;
+    aside.innerHTML=`<h2>Resumen del día ${todayStr()}</h2>
+      <div>Pedidos: ${todays.length}</div>
       <div>Total: ${nf.format(total)}</div>
       <hr/>
       <div><strong>Productos vendidos</strong></div>
       ${products.map(p=>`<div>${p.producto}${p.tamano?` (${p.tamano})`:``}: ${p.cantidad}</div>`).join("")}
     `;
-    aside.innerHTML=""; aside.appendChild(tmp);
     window.print();
-    // Restaurar panel derecho
-    location.reload(); // más simple para volver a estado normal
+    aside.innerHTML=prevHTML;
+
+    // BORRAR pedidos de hoy
+    const all=getOrders();
+    const remaining=all.filter(o=> o.dateKey!==todayStr());
+    setOrders(remaining);
+
+    // Refrescar vistas
+    renderOrdersTable(); renderSummaryBox(); renderDaysTable();
+    alert("Día finalizado: resumen guardado y pedidos del día borrados.");
   });
 
   function renderDaysTable(){
@@ -599,12 +649,14 @@
   function showView(id){
     document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
     $(id).classList.add("active");
-    // mostrar/ocultar subnav
-    if(id==="#viewPedidos"){ $("#subnav").style.display="none"; }
-    else { $("#subnav").style.display="flex"; }
+    $("#subnav").style.display = (id==="#viewPedidos") ? "none" : "flex";
   }
+  const goHome = ()=> showView("#viewPedidos");
+
   $("#btnResumen").addEventListener("click", ()=>{ showView("#viewResumen"); renderOrdersTable(); renderSummaryBox(); });
-  $("#navPedidos").addEventListener("click", ()=> showView("#viewPedidos"));
+  $("#navPedidos").addEventListener("click", goHome);
+  $("#btnHome").addEventListener("click", goHome);
+
   $("#tabResumen").addEventListener("click", ()=>{
     $("#tabResumen").classList.add("active"); $("#tabDias").classList.remove("active");
     showView("#viewResumen"); renderOrdersTable(); renderSummaryBox();
