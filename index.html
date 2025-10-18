@@ -34,19 +34,21 @@
   .chip{border:1px solid #22304a;background:#0e131c;color:#e9eef4;padding:8px 10px;border-radius:999px;cursor:pointer}
   .chip.active{border-color:var(--brand);color:#fff}
 
-  /* Layout general por defecto (Resumen y Días) */
-  .wrap{display:grid !important;grid-template-columns:3fr 1.15fr;gap:18px;max-width:1400px;margin:16px auto;padding:16px}
+  /* Vistas: ocultar todo salvo la activa */
+  .view{display:none !important}
+  .view.active{display:grid !important}
+
+  /* Layout general */
+  .wrap{display:grid;grid-template-columns:3fr 1.15fr;gap:18px;max-width:1400px;margin:16px auto;padding:16px}
   .left{min-height:70vh;background:var(--panel);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
   .right{align-self:start;background:var(--panel);border-radius:var(--radius);
          padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 100px)}
 
-  /* 👉 Vista PEDIDOS: sidebar fijo a la derecha */
+  /* 👉 Vista PEDIDOS: layout 70% productos | 30% comanda */
+  #viewPedidos.wrap{grid-template-columns:70% 30%}
   #viewPedidos{position:relative}
-  #viewPedidos .left{ margin-right: 440px; }              /* deja espacio para el sidebar fijo */
-  #viewPedidos .right{
-    position: fixed; top: 76px; right: 16px; width: 420px; /* SIEMPRE visible a la derecha */
-    max-height: calc(100vh - 100px); overflow: hidden;
-  }
+  #viewPedidos .left{margin-right:0}
+  #viewPedidos .right{position:sticky; top:76px; right:auto; width:auto; max-height:calc(100vh - 100px); overflow:auto}
 
   /* Contenido del panel derecho */
   .order-title{font-weight:900;font-size:20px;letter-spacing:.6px}
@@ -86,8 +88,8 @@
   .modal .title{font-size:18px;font-weight:900}
   .size-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .size-btn{border:2px solid #2a3a52;background:#0b1018;color:#e9eef4;padding:12px;border-radius:12px;cursor:pointer;text-align:center;font-weight:800}
-  .size-btn strong{display:block;color:var(--brand);font-size:13px;margin-top:4px}
-  .size-btn:hover{border-color:var(--brand)}
+  .size-btn strong{display:block;color:#00a86b;font-size:13px;margin-top:4px}
+  .size-btn:hover{border-color:#00a86b}
   .qty-row{display:flex;align-items:center;gap:10px;margin-top:4px}
   .qty-box{display:flex;align-items:center;gap:6px;background:#0a0f17;border:1px solid #253144;border-radius:10px;padding:6px 8px}
   .qty-box input{width:64px;background:transparent;border:none;color:#e9eef4;font-weight:700;text-align:center;outline:none}
@@ -136,7 +138,7 @@
     <button class="chip" id="tabDias">Días</button>
   </div>
 
-  <!-- PEDIDOS -->
+  <!-- PEDIDOS (MENÚ PRINCIPAL) -->
   <main class="wrap view active" id="viewPedidos">
     <section class="left">
       <div class="toolbar">
@@ -258,7 +260,8 @@
   const LS_DAYS   = "pgl_days";
 
   // ====== HELPERS ======
-  const $ = s => document.querySelector(s);
+  const qs = (s) => document.querySelector(s);
+  const qsa = (s) => Array.from(document.querySelectorAll(s));
   const nf = new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',minimumFractionDigits:2});
   const todayStr = ()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
   const uid = () => 'PGL-' + Math.random().toString(36).slice(2,8).toUpperCase();
@@ -271,7 +274,7 @@
       ? `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${encodeURIComponent(GID)}&tqx=out:json`
       : `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
   }
-  function setStatus(msg){ $("#status").textContent = msg || ""; }
+  function setStatus(msg){ qs("#status").textContent = msg || ""; }
 
   // ====== Sheet mapping ======
   function buildColMap(table){
@@ -308,7 +311,7 @@
 
   // ====== Render productos ======
   function renderCategories(catBlocks){
-    const root=$("#categories"); root.innerHTML="";
+    const root=qs("#categories"); root.innerHTML="";
     catBlocks.forEach(block=>{
       const wrap=document.createElement("section"); wrap.className="category";
       const head=document.createElement("div"); head.className="cat-head";
@@ -323,12 +326,12 @@
       wrap.append(head,grid); root.appendChild(wrap);
     });
     const total=catBlocks.reduce((a,b)=>a+b.items.length,0);
-    $("#countBadge").textContent=`${total} producto${total===1?"":"s"}`;
+    qs("#countBadge").textContent=`${total} producto${total===1?"":"s"}`;
   }
 
   // ====== Carrito / Comanda ======
   function renderCart(){
-    const list=$("#orderList"); list.innerHTML="";
+    const list=qs("#orderList"); list.innerHTML="";
     cart.forEach((it,idx)=>{
       const line=document.createElement("div"); line.className="line";
       const left=document.createElement("div"); left.innerHTML=`<h4>${it.producto}</h4><div class="muted">${it.tamano||"—"}</div>`;
@@ -343,7 +346,7 @@
       line.append(left,qty,price,rm); list.appendChild(line);
     });
     const total=cart.reduce((acc,it)=>acc+it.cantidad*it.precio,0);
-    $("#total").textContent=nf.format(total);
+    qs("#total").textContent=nf.format(total);
   }
   function changeQty(i,d){ cart[i].cantidad+=d; if(cart[i].cantidad<=0) cart.splice(i,1); renderCart(); persistCart(); }
   function removeLine(i){ cart.splice(i,1); renderCart(); persistCart(); }
@@ -356,39 +359,39 @@
   // ====== Modal tamaños ======
   function openModal(item){
     currentItem=item;
-    $("#modalTitle").textContent=item.producto;
-    $("#qtyInp").value=1;
-    const grid=$("#sizeGrid"); grid.innerHTML="";
+    qs("#modalTitle").textContent=item.producto;
+    qs("#qtyInp").value=1;
+    const grid=qs("#sizeGrid"); grid.innerHTML="";
     const vars=item.variantes.length?item.variantes:[{tamano:"Único",precio:item.variantes?.[0]?.precio||0}];
     vars.forEach(v=>{
       const btn=document.createElement("button"); btn.className="size-btn"; btn.type="button";
       const label=v.tamano||"Único"; btn.innerHTML=`${label}<strong>${nf.format(Number(v.precio)||0)}</strong>`;
       btn.addEventListener("click",()=>{
-        const qty=Math.max(1,parseInt($("#qtyInp").value||"1",10));
+        const qty=Math.max(1,parseInt(qs("#qtyInp").value||"1",10));
         addToCart(item.producto,label,Number(v.precio)||0,qty);
         closeModal();
       });
       grid.appendChild(btn);
     });
-    $("#modal").classList.add("open"); $("#modal").setAttribute("aria-hidden","false");
+    qs("#modal").classList.add("open"); qs("#modal").setAttribute("aria-hidden","false");
   }
-  function closeModal(){ $("#modal").classList.remove("open"); $("#modal").setAttribute("aria-hidden","true"); currentItem=null; }
-  $("#cancelBtn").addEventListener("click",closeModal);
-  $("#modal").addEventListener("click",(e)=>{ if(e.target===e.currentTarget) closeModal(); });
+  function closeModal(){ qs("#modal").classList.remove("open"); qs("#modal").setAttribute("aria-hidden","true"); currentItem=null; }
+  qs("#cancelBtn").addEventListener("click",closeModal);
+  qs("#modal").addEventListener("click",(e)=>{ if(e.target===e.currentTarget) closeModal(); });
   window.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
-  $("#mMinus").addEventListener("click",()=>{ const el=$("#qtyInp"); el.value=Math.max(1,(parseInt(el.value||"1",10)-1)); });
-  $("#mPlus").addEventListener("click",()=>{ const el=$("#qtyInp"); el.value=Math.max(1,(parseInt(el.value||"1",10)+1)); });
+  qs("#mMinus").addEventListener("click",()=>{ const el=qs("#qtyInp"); el.value=Math.max(1,(parseInt(el.value||"1",10)-1)); });
+  qs("#mPlus").addEventListener("click",()=>{ const el=qs("#qtyInp"); el.value=Math.max(1,(parseInt(el.value||"1",10)+1)); });
 
   // ====== Storage ======
   function persistCart(){
     localStorage.setItem(LS_CART, JSON.stringify({
-      cart, addr:$("#addr").value, time:$("#time").value, editingId: currentEditingId
+      cart, addr:qs("#addr").value, time:qs("#time").value, editingId: currentEditingId
     }));
   }
   function restoreCart(){
     try{
       const raw=JSON.parse(localStorage.getItem(LS_CART)||"{}");
-      cart=raw.cart||[]; $("#addr").value=raw.addr||""; $("#time").value=raw.time||"";
+      cart=raw.cart||[]; qs("#addr").value=raw.addr||""; qs("#time").value=raw.time||"";
       currentEditingId = raw.editingId || null;
       refreshOrderIdBadge();
     }catch{ cart=[]; currentEditingId=null; }
@@ -418,7 +421,7 @@
   }
 
   // ====== Buscar ======
-  $("#search").addEventListener("input",(e)=>{
+  qs("#search").addEventListener("input",(e)=>{
     const q=normalizeKey(e.target.value);
     const filtered=!q?byCategory:byCategory.map(c=>({categoria:c.categoria,items:c.items.filter(p=>normalizeKey(p.producto).includes(q))})).filter(c=>c.items.length);
     renderCategories(filtered);
@@ -426,7 +429,7 @@
 
   // ====== Pedido / ID ======
   function refreshOrderIdBadge(){
-    const badge = $("#orderIdBadge");
+    const badge = qs("#orderIdBadge");
     if(currentEditingId){ badge.textContent = `ID: ${currentEditingId}`; badge.style.display = "block"; }
     else { badge.textContent = ""; badge.style.display = "none"; }
   }
@@ -436,8 +439,8 @@
       id: currentEditingId || uid(),
       dateISO: new Date().toISOString(),
       dateKey: todayStr(),
-      address: $("#addr").value.trim(),
-      delivery: $("#time").value || "",
+      address: qs("#addr").value.trim(),
+      delivery: qs("#time").value || "",
       items: JSON.parse(JSON.stringify(cart)),
       total
     };
@@ -452,31 +455,63 @@
   // ====== Imprimir ticket (guarda/actualiza y limpia) ======
   function printTicketFlow(){
     if(!cart.length){ alert("La comanda está vacía."); return; }
-    const order=buildOrderFromUI();
+
+    // 1) Guardar/actualizar pedido y fijar ID visible
+    const order = buildOrderFromUI();
     upsertOrder(order);
     currentEditingId = order.id;
     refreshOrderIdBadge();
     persistCart();
 
-    // Mostrar ID en ticket
-    const idNode=$("#orderIdBadge");
-    idNode.textContent=`ID: ${order.id}`; idNode.style.display="block";
+    const idNode = qs("#orderIdBadge");
+    idNode.textContent = `ID: ${order.id}`;
+    idNode.style.display = "block";
 
-    const aside=document.querySelector("#viewPedidos .right");
+    // 2) Preparar panel para ticket
+    const aside = document.querySelector("#viewPedidos .right");
     aside.classList.add("ticket");
-    window.print();
-    aside.classList.remove("ticket");
 
-    // LIMPIAR panel luego de imprimir
-    cart=[]; $("#addr").value=""; $("#time").value=""; currentEditingId=null;
-    renderCart(); refreshOrderIdBadge(); persistCart();
+    // 3) Imprimir y limpiar SIEMPRE (aunque el usuario cancele)
+    let cleaned = false;
+    const cleanupAfterPrint = () => {
+      if(cleaned) return; cleaned = true;
+      // Quitar modo ticket y limpiar comanda
+      aside.classList.remove("ticket");
+      cart = [];
+      qs("#addr").value = "";
+      qs("#time").value = "";
+      currentEditingId = null;
+      renderCart();
+      refreshOrderIdBadge();
+      persistCart();
+    };
+
+    // Usar onafterprint cuando esté disponible
+    const prevAfter = window.onafterprint;
+    window.onafterprint = function(){
+      cleanupAfterPrint();
+      // restaurar handler previo si lo había
+      window.onafterprint = prevAfter || null;
+    };
+
+    // Fallback por si onafterprint no dispara (algunos navegadores/entornos)
+    const fallback = setTimeout(()=>{
+      cleanupAfterPrint();
+    }, 15000);
+
+    // Llamada síncrona para evitar bloqueos del diálogo de impresión
+    try {
+      window.print();
+    } finally {
+      if(cleaned){ clearTimeout(fallback); }
+    }
   }
 
-  $("#printBtn").addEventListener("click", printTicketFlow);
+  qs("#printBtn").addEventListener("click", printTicketFlow);
 
-  $("#clearBtn").addEventListener("click",()=>{
+  qs("#clearBtn").addEventListener("click",()=>{
     if(confirm("¿Vaciar comanda?")){
-      cart=[]; $("#addr").value=""; $("#time").value="";
+      cart=[]; qs("#addr").value=""; qs("#time").value="";
       currentEditingId = null; refreshOrderIdBadge();
       renderCart(); persistCart();
     }
@@ -498,7 +533,7 @@
   }
 
   function renderOrdersTable(){
-    const tb=$("#ordersTable tbody"); tb.innerHTML="";
+    const tb=qs("#ordersTable tbody"); tb.innerHTML="";
     const list=ordersOfToday();
     list.forEach((o)=>{
       const tr=document.createElement("tr");
@@ -517,7 +552,6 @@
       tb.appendChild(tr);
     });
 
-    // inline edit de dirección/hora
     tb.querySelectorAll('input.in').forEach(inp=>{
       inp.addEventListener('change',(e)=>{
         const id=e.target.dataset.id, k=e.target.dataset.k;
@@ -526,7 +560,6 @@
       });
     });
 
-    // acciones
     tb.querySelectorAll('button[data-act]').forEach(btn=>{
       btn.addEventListener('click', (e)=>{
         const act=e.currentTarget.dataset.act; const id=e.currentTarget.dataset.id;
@@ -539,8 +572,7 @@
         }
 
         if(act==="edit"){
-          // Reabrir en vista PEDIDOS (mismo ID)
-          cart=o.items; $("#addr").value=o.address||""; $("#time").value=o.delivery||"";
+          cart=o.items; qs("#addr").value=o.address||""; qs("#time").value=o.delivery||"";
           currentEditingId=o.id; refreshOrderIdBadge(); renderCart(); persistCart();
           showView("#viewPedidos");
           document.querySelector("#viewPedidos .right").scrollIntoView({behavior:"smooth",block:"start"});
@@ -548,11 +580,9 @@
         }
 
         if(act==="print"){
-          // Ir a vista PEDIDOS, cargar y usar flujo de ticket (NO resumen del día)
-          cart=o.items; $("#addr").value=o.address||""; $("#time").value=o.delivery||"";
+          cart=o.items; qs("#addr").value=o.address||""; qs("#time").value=o.delivery||"";
           currentEditingId=o.id; refreshOrderIdBadge(); renderCart(); persistCart();
           showView("#viewPedidos");
-          // Espera un ciclo para que cambie de vista y luego imprime
           setTimeout(printTicketFlow, 0);
           return;
         }
@@ -563,7 +593,7 @@
   function renderSummaryBox(){
     const list=ordersOfToday();
     const {products,total}=aggregateProducts(list);
-    if(!list.length){ $("#summaryBox").innerHTML="Sin pedidos hoy."; return; }
+    if(!list.length){ qs("#summaryBox").innerHTML="Sin pedidos hoy."; return; }
     let html=`<div class="small">Pedidos: <strong>${list.length}</strong></div>`;
     html+=`<div class="small">Ingresos: <strong>${nf.format(total)}</strong></div>`;
     html+=`<div style="margin-top:8px"><strong>Productos vendidos</strong></div>`;
@@ -574,13 +604,13 @@
       html+=`<div>${label}: <strong>${p.cantidad}</strong></div>`;
     }
     html+=`</div>`;
-    $("#summaryBox").innerHTML=html;
+    qs("#summaryBox").innerHTML=html;
   }
 
-  $("#btnRecalc").addEventListener("click", renderSummaryBox);
+  qs("#btnRecalc").addEventListener("click", renderSummaryBox);
 
   // ====== Finalizar Día (imprime resumen y guarda en Días) ======
-  $("#btnFinalizarDia").addEventListener("click", ()=>{
+  qs("#btnFinalizarDia").addEventListener("click", ()=>{
     const todays = ordersOfToday();
     if(!todays.length){ alert("No hay pedidos para cerrar hoy."); return; }
     const {products,total}=aggregateProducts(todays);
@@ -589,7 +619,6 @@
     days.push({ date: todayStr(), orders: todays.length, total, products, savedAt: new Date().toISOString() });
     setDays(days);
 
-    // Imprimir resumen del día (esta impresión se hace en la vista Resumen)
     const aside=document.querySelector("#viewResumen .right");
     const prevHTML=aside.innerHTML;
     aside.innerHTML=`<h2>Resumen del día ${todayStr()}</h2>
@@ -602,7 +631,6 @@
     aside.classList.add("ticket"); window.print(); aside.classList.remove("ticket");
     aside.innerHTML=prevHTML;
 
-    // Borrar pedidos de hoy (queda guardado en DÍAS)
     const all=getOrders();
     const remaining=all.filter(o=> o.dateKey!==todayStr());
     setOrders(remaining);
@@ -613,7 +641,7 @@
 
   // ====== Días (lista y limpiar historial) ======
   function renderDaysTable(){
-    const tb=$("#daysTable tbody"); tb.innerHTML="";
+    const tb=qs("#daysTable tbody"); tb.innerHTML="";
     const days=getDays();
     days.forEach(d=>{
       const tr=document.createElement("tr");
@@ -622,35 +650,51 @@
       tb.appendChild(tr);
     });
   }
-  $("#btnLimpiarDias").addEventListener("click", ()=>{
-    if(confirm("¿Vaciar historial de DÍAS? Esta acción no se puede deshacer.")){
+
+  // BORRAR TODO EL REGISTRO (cierres + pedidos)
+  qs("#btnLimpiarDias").addEventListener("click", ()=>{
+    if(confirm("¿Vaciar por completo el registro? (Cierres + Pedidos guardados)")){
       localStorage.setItem(LS_DAYS, JSON.stringify([]));
+      localStorage.setItem(LS_ORDERS, JSON.stringify([]));
       renderDaysTable();
-      alert("Historial de DÍAS limpiado.");
+      renderOrdersTable();
+      renderSummaryBox();
+      showView("#viewDias");
+      alert("Registro COMPLETO limpiado.");
     }
   });
 
   // ====== NAV ======
   function showView(id){
-    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-    $(id).classList.add("active");
-    $("#subnav").style.display = (id==="#viewPedidos") ? "none" : "flex";
+    qsa(".view").forEach(v=>v.classList.remove("active"));
+    qs(id).classList.add("active");
+    qs("#subnav").style.display = (id==="#viewPedidos") ? "none" : "flex";
   }
   const goHome=()=> showView("#viewPedidos");
 
-  $("#btnResumen").addEventListener("click", ()=>{ showView("#viewResumen"); renderOrdersTable(); renderSummaryBox(); });
-  $("#navPedidos").addEventListener("click", goHome);
-  $("#btnHome").addEventListener("click", goHome);
-  $("#tabResumen").addEventListener("click", ()=>{ $("#tabResumen").classList.add("active"); $("#tabDias").classList.remove("active"); showView("#viewResumen"); renderOrdersTable(); renderSummaryBox(); });
-  $("#tabDias").addEventListener("click", ()=>{ $("#tabDias").classList.add("active"); $("#tabResumen").classList.remove("active"); showView("#viewDias"); renderDaysTable(); });
+  qs("#btnResumen").addEventListener("click", ()=>{ showView("#viewResumen"); renderOrdersTable(); renderSummaryBox(); });
+  qs("#navPedidos").addEventListener("click", goHome);
+  qs("#btnHome").addEventListener("click", goHome);
+  qs("#tabResumen").addEventListener("click", ()=>{ qs("#tabResumen").classList.add("active"); qs("#tabDias").classList.remove("active"); showView("#viewResumen"); renderOrdersTable(); renderSummaryBox(); });
+  qs("#tabDias").addEventListener("click", ()=>{ qs("#tabDias").classList.add("active"); qs("#tabResumen").classList.remove("active"); showView("#viewDias"); renderDaysTable(); });
 
   // ====== Top ======
-  $("#editLink").href=SHEET_EDIT_URL;
-  $("#reloadBtn").addEventListener("click", fetchSheet);
+  qs("#editLink").href=SHEET_EDIT_URL;
+  qs("#reloadBtn").addEventListener("click", fetchSheet);
 
   // ====== INIT ======
   restoreCart();
   fetchSheet();
+
+  // ====== TESTS RÁPIDOS (consola) ======
+  console.group("Smoke tests");
+  try{ console.assert(typeof qs==="function" && qs("#viewPedidos"), "qs disponible y #viewPedidos existe"); }catch(e){ console.error(e); }
+  try{ const _u=uid(); console.assert(_u.startsWith("PGL-"), "uid con prefijo PGL-"); }catch(e){ console.error(e); }
+  try{ console.assert(typeof printTicketFlow==="function", "printTicketFlow existe"); }catch(e){ console.error(e); }
+  // Tests adicionales no destructivos
+  try{ console.assert(typeof window.onafterprint !== 'undefined', 'onafterprint soportado o definible'); }catch(e){ console.error(e); }
+  try{ console.assert(Array.isArray(JSON.parse(localStorage.getItem(LS_DAYS)||'[]')), 'LS_DAYS es array'); }catch(e){ console.error(e); }
+  console.groupEnd();
 })();
 </script>
 </body>
