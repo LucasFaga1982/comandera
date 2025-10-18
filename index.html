@@ -12,6 +12,7 @@
   body{margin:0;background:radial-gradient(1200px 1200px at 20% 10%, #151922 0%, #0d0f14 45%, #0a0c10 100%);
        color:#eef1f4;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif}
 
+  /* Topbar */
   .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;
           padding:10px 14px;background:#0b0e13e6;border-bottom:1px solid #1d232f;backdrop-filter: blur(6px)}
   .brand{display:flex;align-items:center;gap:12px;cursor:pointer}
@@ -24,28 +25,37 @@
   .btn-brand{background:linear-gradient(135deg,var(--brand),#0e7f56);border:none;color:#fff}
   .btn-danger{background:#742323;border:1px solid #9f2a2a;color:#ffd9d9}
   .btn-ghost{background:transparent;border:1px dashed #374151}
+
+  /* Subnav (Resumen/Días) */
   .subnav{display:flex;gap:8px;margin:8px 16px 0}
   .chip{border:1px solid #22304a;background:#0e131c;color:#e9eef4;padding:8px 10px;border-radius:999px;cursor:pointer}
   .chip.active{border-color:var(--brand);color:#fff}
 
+  /* Layout: SIEMPRE 2 columnas (PC) */
   .wrap{display:grid;grid-template-columns:3fr 1.15fr;gap:18px;max-width:1400px;margin:16px auto;padding:16px}
   .left{min-height:70vh;background:var(--panel);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
   .right{position:sticky;top:76px;align-self:start;background:var(--panel);border-radius:var(--radius);
          padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 100px)}
+
+  /* Buscador */
   .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
   .search{flex:1;background:#0e131c;border:1px solid #22304a;color:#e9eef4;padding:10px 12px;border-radius:12px;outline:none}
   .badge{font-size:12px;color:#b8bfca}
+
+  /* Categorías y tarjetas */
   .category{margin:12px 0 18px;border:1px solid #1f2838;border-radius:16px;background:#0e1219}
   .cat-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #1f2838;background:linear-gradient(180deg,#0f141e,#0e1219);border-top-left-radius:16px;border-top-right-radius:16px}
   .cat-name{font-weight:800;letter-spacing:.3px}
   .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:12px}
 
+  /* Card (solo nombre) */
   .card{background:var(--card);color:var(--ink);border:2px solid #e2e5e9;border-radius:18px;padding:18px;cursor:pointer;min-height:84px;
         display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;letter-spacing:.2px;text-transform:uppercase;
         box-shadow:0 6px 14px rgba(0,0,0,.15);transition:transform .08s ease, box-shadow .15s ease, border-color .15s ease}
   .card:hover{transform:translateY(-2px);border-color:var(--brand);box-shadow:0 10px 24px rgba(0,0,0,.25)}
   .card:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 
+  /* Comanda */
   .order-title{font-weight:900;font-size:20px;letter-spacing:.6px}
   .order-id{font-size:12px;color:#b7bfca}
   .order-list{display:flex;flex-direction:column;gap:10px;overflow:auto;padding-right:2px}
@@ -62,6 +72,7 @@
   .field{display:flex;flex-direction:column;gap:6px}
   .in{background:#0e131c;border:1px solid #22304a;color:#e9eef4;padding:8px 10px;border-radius:10px;outline:none}
 
+  /* Modal tamaños */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:60;padding:16px}
   .modal.open{display:flex}
   .modal-card{width:min(560px,96vw);background:#0f141d;border:1px solid #233149;border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
@@ -75,14 +86,17 @@
   .qty-box input{width:64px;background:transparent;border:none;color:#e9eef4;font-weight:700;text-align:center;outline:none}
   .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
 
+  /* Vistas */
   .view{display:none}
   .view.active{display:block}
 
+  /* Tabla */
   table{width:100%;border-collapse:collapse}
   th,td{border-bottom:1px solid #22304a;padding:8px;text-align:left;font-size:14px}
   th{color:#cfd6df}
   tr:hover td{background:#0e131c}
 
+  /* Print */
   @media print{
     body{background:#fff}
     .topbar,.left,.btn,.toolbar,.subnav{display:none !important}
@@ -106,12 +120,14 @@
     </div>
     <div class="actions">
       <button class="btn" id="btnHome" title="Volver al menú principal">Menú principal</button>
-      <a class="btn btn-brand" id="editLink" href="#" target="_blank" rel="noopener">Editar precios</a>
       <button class="btn" id="reloadBtn" title="Recargar datos">&#x21bb; Recargar</button>
       <button class="btn" id="btnResumen" title="Resumen del día">Resumen</button>
+      <!-- Editar precios AL FINAL -->
+      <a class="btn btn-brand" id="editLink" href="#" target="_blank" rel="noopener">Editar precios</a>
     </div>
   </header>
 
+  <!-- Subnav (Resumen/Días) -->
   <div class="subnav" id="subnav" style="display:none">
     <button class="chip active" id="tabResumen">Pedidos del día</button>
     <button class="chip" id="tabDias">Días</button>
@@ -121,7 +137,7 @@
   <main class="wrap view active" id="viewPedidos">
     <section class="left">
       <div class="toolbar">
-        <input id="search" class="search" type="search" placeholder="Buscar producto…" />
+        <input id="search" class="search" type="search" placeholder="Buscar producto…">
         <span class="badge" id="countBadge">0 productos</span>
       </div>
       <div id="categories"></div>
@@ -140,21 +156,22 @@
         <span id="total" class="total">$ 0,00</span>
       </div>
 
+      <!-- Dirección y Horario DESPUÉS de los productos -->
       <div class="field">
         <label for="addr" class="small">Dirección</label>
-        <input id="addr" class="in" type="text" placeholder="Calle y número, piso, etc." />
+        <input id="addr" class="in" type="text" placeholder="Calle y número, piso, etc.">
       </div>
       <div class="field">
         <label for="time" class="small">Horario de entrega</label>
-        <input id="time" class="in" type="time" />
+        <input id="time" class="in" type="time">
       </div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-danger" id="clearBtn">Vaciar</button>
-        <button class="btn" id="saveBtn">Guardar</button>
+        <!-- Se quitó GUARDAR -->
         <button class="btn" id="printBtn">Imprimir</button>
       </div>
-      <div class="small">* Guardar o Imprimir registra la comanda en el Resumen.</div>
+      <div class="small">* Imprimir guarda/actualiza el pedido y limpia la comanda.</div>
     </aside>
   </main>
 
@@ -162,14 +179,10 @@
   <main class="wrap view" id="viewResumen">
     <section class="left">
       <h3 style="margin:0 0 10px">Pedidos del día</h3>
-      <div class="small">Editá Dirección u Horario y presioná “💾”, o usá “✏️ Editar” para reabrir la comanda.</div>
+      <div class="small">Usá “✏️ Editar” para reabrir la comanda, modificar y volver a imprimir (mismo ID).</div>
       <div style="overflow:auto">
         <table id="ordersTable">
-          <thead>
-            <tr>
-              <th>ID</th><th>Hora</th><th>Dirección</th><th>Entrega</th><th>Total</th><th>Acciones</th>
-            </tr>
-          </thead>
+          <thead><tr><th>ID</th><th>Hora</th><th>Dirección</th><th>Entrega</th><th>Total</th><th>Acciones</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -212,7 +225,7 @@
         <span>Cantidad</span>
         <div class="qty-box">
           <button class="btn" id="mMinus" style="padding:4px 8px">−</button>
-          <input id="qtyInp" type="number" min="1" value="1" />
+          <input id="qtyInp" type="number" min="1" value="1">
           <button class="btn" id="mPlus" style="padding:4px 8px">+</button>
         </div>
       </div>
@@ -233,7 +246,7 @@
   let byCategory = [];
   let cart = [];
   let currentItem = null;
-  let currentEditingId = null; // << nuevo: si estamos editando un pedido existente, guardamos su ID
+  let currentEditingId = null; // ID cuando reeditás
 
   // localStorage keys
   const LS_CART   = "pgl_cart";
@@ -256,6 +269,7 @@
   }
   function setStatus(msg){ $("#status").textContent = msg || ""; }
 
+  // ====== Sheet mapping ======
   function buildColMap(table){
     const cols=(table.cols||[]).map((c,i)=>({i,key:normalizeKey(c.label||"")}));
     const find=(...names)=>{ const set=names.map(n=>normalizeKey(n)); const hit=cols.find(c=>set.includes(c.key)); return hit?hit.i:null; };
@@ -288,7 +302,7 @@
     return [...cats.entries()].map(([categoria,items])=>({categoria,items})).sort((a,b)=>a.categoria.localeCompare(b.categoria,'es'));
   }
 
-  // ====== RENDER PEDIDOS ======
+  // ====== Render productos ======
   function renderCategories(catBlocks){
     const root=$("#categories"); root.innerHTML="";
     catBlocks.forEach(block=>{
@@ -307,6 +321,8 @@
     const total=catBlocks.reduce((a,b)=>a+b.items.length,0);
     $("#countBadge").textContent=`${total} producto${total===1?"":"s"}`;
   }
+
+  // ====== Carrito / Comanda ======
   function renderCart(){
     const list=$("#orderList"); list.innerHTML="";
     cart.forEach((it,idx)=>{
@@ -333,7 +349,7 @@
     renderCart(); persistCart();
   }
 
-  // ====== MODAL ======
+  // ====== Modal tamaños ======
   function openModal(item){
     currentItem=item;
     $("#modalTitle").textContent=item.producto;
@@ -359,7 +375,7 @@
   $("#mMinus").addEventListener("click",()=>{ const el=$("#qtyInp"); el.value=Math.max(1,(parseInt(el.value||"1",10)-1)); });
   $("#mPlus").addEventListener("click",()=>{ const el=$("#qtyInp"); el.value=Math.max(1,(parseInt(el.value||"1",10)+1)); });
 
-  // ====== STORAGE ======
+  // ====== Storage ======
   function persistCart(){
     localStorage.setItem(LS_CART, JSON.stringify({
       cart, addr:$("#addr").value, time:$("#time").value, editingId: currentEditingId
@@ -379,7 +395,7 @@
   function getDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)||"[]"); }catch{ return []; } }
   function setDays(arr){ localStorage.setItem(LS_DAYS, JSON.stringify(arr)); }
 
-  // ====== SHEET ======
+  // ====== Fetch Sheet ======
   async function fetchSheet(){
     setStatus("Cargando productos…");
     try{
@@ -397,23 +413,18 @@
     }catch(err){ console.error(err); setStatus("Error al cargar datos. Revisá permisos del Sheet."); }
   }
 
-  // ====== BUSCAR ======
+  // ====== Buscar ======
   $("#search").addEventListener("input",(e)=>{
     const q=normalizeKey(e.target.value);
     const filtered=!q?byCategory:byCategory.map(c=>({categoria:c.categoria,items:c.items.filter(p=>normalizeKey(p.producto).includes(q))})).filter(c=>c.items.length);
     renderCategories(filtered);
   });
 
-  // ====== ORDEN ======
+  // ====== Pedido / ID ======
   function refreshOrderIdBadge(){
     const badge = $("#orderIdBadge");
-    if(currentEditingId){
-      badge.textContent = `ID: ${currentEditingId} (editando)`;
-      badge.style.display = "block";
-    }else{
-      badge.textContent = "";
-      badge.style.display = "none";
-    }
+    if(currentEditingId){ badge.textContent = `ID: ${currentEditingId}`; badge.style.display = "block"; }
+    else { badge.textContent = ""; badge.style.display = "none"; }
   }
 
   function buildOrderFromUI(){
@@ -436,52 +447,38 @@
     setOrders(all);
   }
 
-  $("#saveBtn").addEventListener("click",()=>{
-    if(!cart.length){ alert("La comanda está vacía."); return; }
-    const order=buildOrderFromUI();
-    upsertOrder(order);
-    currentEditingId = order.id; // queda seteado si era nuevo
-    persistCart();
-    refreshOrderIdBadge();
-    alert(`Comanda ${order.id} guardada en Resumen.`);
-  });
-
+  // ====== Imprimir (guarda/actualiza y limpia panel) ======
   $("#printBtn").addEventListener("click",()=>{
     if(!cart.length){ alert("La comanda está vacía."); return; }
     const order=buildOrderFromUI();
     upsertOrder(order);
     currentEditingId = order.id;
-    persistCart();
     refreshOrderIdBadge();
+    persistCart();
 
-    // Mostrar el ID en el ticket
-    const idNode = $("#orderIdBadge");
-    const prev = { text: idNode.textContent, disp: idNode.style.display };
-    idNode.textContent = `ID: ${order.id}`;
-    idNode.style.display = "block";
+    // Mostrar ID en ticket
+    const idNode=$("#orderIdBadge"); const prev={text:idNode.textContent,disp:idNode.style.display};
+    idNode.textContent=`ID: ${order.id}`; idNode.style.display="block";
 
     document.querySelector(".right").classList.add("ticket");
     window.print();
-    setTimeout(()=> {
-      document.querySelector(".right").classList.remove("ticket");
-      // Restaurar estado (si estaba oculto)
-      if(!prev.text){ idNode.textContent = ""; idNode.style.display = prev.disp; }
-    },0);
+    document.querySelector(".right").classList.remove("ticket");
+
+    // LIMPIAR panel (como pediste)
+    cart=[]; $("#addr").value=""; $("#time").value=""; currentEditingId=null;
+    renderCart(); refreshOrderIdBadge(); persistCart();
   });
 
   $("#clearBtn").addEventListener("click",()=>{
     if(confirm("¿Vaciar comanda?")){
       cart=[]; $("#addr").value=""; $("#time").value="";
-      currentEditingId = null;
-      refreshOrderIdBadge();
+      currentEditingId = null; refreshOrderIdBadge();
       renderCart(); persistCart();
     }
   });
 
-  // ====== RESUMEN DEL DÍA ======
-  function ordersOfToday(){
-    const all=getOrders(); const key=todayStr(); return all.filter(o=>o.dateKey===key);
-  }
+  // ====== Resumen del día ======
+  function ordersOfToday(){ const all=getOrders(); const key=todayStr(); return all.filter(o=>o.dateKey===key); }
   function aggregateProducts(orders){
     const map=new Map(); let total=0;
     for(const o of orders){
@@ -498,25 +495,24 @@
   function renderOrdersTable(){
     const tb=$("#ordersTable tbody"); tb.innerHTML="";
     const list=ordersOfToday();
-    list.forEach((o,idx)=>{
+    list.forEach((o)=>{
       const tr=document.createElement("tr");
       const time=new Date(o.dateISO).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
       tr.innerHTML=`
         <td>${o.id}</td>
         <td>${time}</td>
-        <td><input data-id="${o.id}" data-k="address" class="in" value="${o.address||""}" /></td>
-        <td><input data-id="${o.id}" data-k="delivery" class="in" type="time" value="${o.delivery||""}" /></td>
+        <td><input data-id="${o.id}" data-k="address" class="in" value="${o.address||""}"></td>
+        <td><input data-id="${o.id}" data-k="delivery" class="in" type="time" value="${o.delivery||""}"></td>
         <td>${nf.format(o.total)}</td>
         <td style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn btn-ghost" data-act="edit"  data-id="${o.id}">✏️ Editar</button>
-          <button class="btn btn-ghost" data-act="save"  data-id="${o.id}">💾</button>
           <button class="btn btn-ghost" data-act="print" data-id="${o.id}">🖨</button>
           <button class="btn btn-danger" data-act="del"   data-id="${o.id}">🗑</button>
         </td>`;
       tb.appendChild(tr);
     });
 
-    // inline edit address/time
+    // editar campos inline (dirección/hora)
     tb.querySelectorAll('input.in').forEach(inp=>{
       inp.addEventListener('change',(e)=>{
         const id=e.target.dataset.id, k=e.target.dataset.k;
@@ -525,38 +521,42 @@
       });
     });
 
-    // actions
+    // acciones
     tb.querySelectorAll('button[data-act]').forEach(btn=>{
       btn.addEventListener('click',(e)=>{
         const act=e.currentTarget.dataset.act; const id=e.currentTarget.dataset.id;
         const all=getOrders(); const i=all.findIndex(x=>x.id===id); if(i<0) return;
+        const o=all[i];
 
-        if(act==="save"){ setOrders(all); alert("Pedido actualizado."); }
+        if(act==="del"){
+          if(confirm("¿Eliminar pedido?")){ all.splice(i,1); setOrders(all); renderOrdersTable(); renderSummaryBox(); }
+          return;
+        }
+
+        if(act==="edit"){
+          // Reabrir pedido en la vista principal (mismo ID)
+          cart=o.items; $("#addr").value=o.address||""; $("#time").value=o.delivery||"";
+          currentEditingId=o.id; refreshOrderIdBadge(); renderCart(); persistCart();
+          showView("#viewPedidos");
+          document.querySelector(".right").scrollIntoView({behavior:"smooth",block:"start"});
+          return;
+        }
 
         if(act==="print"){
-          const o=all[i];
-          // Cargar al panel derecho y mostrar ID en ticket
+          // Cargar y usar flujo de impresión del panel derecho (manteniendo ID)
           cart=o.items; $("#addr").value=o.address||""; $("#time").value=o.delivery||"";
-          currentEditingId=o.id; refreshOrderIdBadge(); renderCart();
+          currentEditingId=o.id; refreshOrderIdBadge(); renderCart(); persistCart();
+
           const idNode=$("#orderIdBadge"); const prev={text:idNode.textContent,disp:idNode.style.display};
           idNode.textContent=`ID: ${o.id}`; idNode.style.display="block";
           document.querySelector(".right").classList.add("ticket");
           window.print();
-          setTimeout(()=>{ document.querySelector(".right").classList.remove("ticket"); if(!prev.text){ idNode.textContent=""; idNode.style.display=prev.disp; } },0);
-        }
+          document.querySelector(".right").classList.remove("ticket");
 
-        if(act==="del"){
-          if(confirm("¿Eliminar pedido?")){ all.splice(i,1); setOrders(all); renderOrdersTable(); renderSummaryBox(); }
-        }
-
-        if(act==="edit"){
-          // Reabrir para edición en la vista principal
-          const o=all[i];
-          cart=o.items; $("#addr").value=o.address||""; $("#time").value=o.delivery||"";
-          currentEditingId=o.id; refreshOrderIdBadge(); renderCart(); persistCart();
-          showView("#viewPedidos");
-          // opcional: scroll al panel derecho
-          document.querySelector(".right").scrollIntoView({behavior:"smooth", block:"start"});
+          // Limpiar panel luego de imprimir (pero el pedido queda en Resumen)
+          cart=[]; $("#addr").value=""; $("#time").value=""; currentEditingId=null;
+          renderCart(); refreshOrderIdBadge(); persistCart();
+          return;
         }
       });
     });
@@ -581,7 +581,7 @@
 
   $("#btnRecalc").addEventListener("click", renderSummaryBox);
 
-  // FINALIZAR DÍA
+  // ====== Finalizar Día ======
   $("#btnFinalizarDia").addEventListener("click", ()=>{
     const todays = ordersOfToday();
     if(!todays.length){ alert("No hay pedidos para cerrar hoy."); return; }
@@ -637,7 +637,7 @@
   $("#tabResumen").addEventListener("click", ()=>{ $("#tabResumen").classList.add("active"); $("#tabDias").classList.remove("active"); showView("#viewResumen"); renderOrdersTable(); renderSummaryBox(); });
   $("#tabDias").addEventListener("click", ()=>{ $("#tabDias").classList.add("active"); $("#tabResumen").classList.remove("active"); showView("#viewDias"); renderDaysTable(); });
 
-  // ====== TOP ======
+  // ====== Top ======
   $("#editLink").href=SHEET_EDIT_URL;
   $("#reloadBtn").addEventListener("click", fetchSheet);
 
