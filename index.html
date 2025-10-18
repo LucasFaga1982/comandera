@@ -2,58 +2,58 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Comandas · Pizza Gourmet Longchamps</title>
   <style>
     :root{
-      --bg:#0f172a;          /* slate-900 */
-      --panel:#111827;       /* gray-900 */
-      --card:#1f2937;        /* gray-800 */
-      --accent:#ef9963;      /* Naty palette */
-      --accent-2:#f3efdc;
-      --ink:#e5e7eb;         /* gray-200 */
-      --muted:#9ca3af;       /* gray-400 */
-      --ok:#22c55e;
-      --danger:#ef4444;
-      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      /* Paleta tomada del look de marca (pizarra + blanco + acento verde) */
+      --bg:#0d0f14;          /* fondo tipo pizarrón */
+      --panel:#111317;       /* panel oscuro */
+      --card:#f5f6f7;        /* tarjetas claras para alto contraste */
+      --ink:#0b0d10;         /* texto oscuro sobre tarjeta clara */
+      --ink-weak:#3c3f44;
+      --muted:#9aa1aa;       /* texto secundario */
+      --brand:#00a86b;       /* acento verde (ajustable) */
+      --brand-2:#e8e9ec;     /* gris muy claro */
+      --danger:#b91c1c;
+      --shadow:0 12px 28px rgba(0,0,0,.35);
       --radius:18px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; background:linear-gradient(180deg,#0b1225,#0f172a);
-      color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
+      margin:0;
+      background:radial-gradient(1200px 1200px at 20% 10%, #151922 0%, var(--bg) 45%, #0a0c10 100%);
+      color:#eef1f4; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
     }
 
     /* Top bar */
     .topbar{
       position:sticky; top:0; z-index:50;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 18px; background:#0b1327e6; backdrop-filter: blur(6px);
-      border-bottom:1px solid #1f2a44;
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:10px 14px;
+      background:#0b0e13e6; border-bottom:1px solid #1d232f; backdrop-filter: blur(6px);
     }
-    .brand{
-      display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.4px;
-    }
-    .brand .logo{
-      width:36px; height:36px; border-radius:12px; background:radial-gradient(circle at 30% 30%, #ef9963, #4d3069 70%); box-shadow: var(--shadow);
-    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .brand img{width:44px; height:44px; border-radius:999px; background:#fff; object-fit:cover; box-shadow: var(--shadow)}
+    .brand .title{font-weight:800; letter-spacing:.3px}
+    .brand .subtitle{font-size:12px; color:#c9ced6}
+
     .actions{display:flex; gap:8px}
     .btn{
-      border:1px solid #2a3554; background:var(--card); color:var(--accent-2);
-      padding:10px 14px; border-radius:12px; cursor:pointer;
-      box-shadow: var(--shadow); font-weight:600;
+      border:1px solid #253042; background:#151a23; color:#eaf0f6;
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700;
+      box-shadow: var(--shadow);
     }
-    .btn:hover{border-color:#3d4b78}
-    .btn-accent{
-      background:linear-gradient(135deg,#ef9963,#4d3069); color:white; border:none;
+    .btn:hover{border-color:#334359}
+    .btn-brand{
+      background:linear-gradient(135deg,var(--brand),#0e7f56); border:none; color:white;
     }
-    .btn-danger{background:#7f1d1d; border:1px solid #b91c1c; color:#fecaca}
-    .btn-ghost{background:transparent; border:1px dashed #374151; color:#cbd5e1}
+    .btn-danger{background:#742323; border:1px solid #9f2a2a; color:#ffd9d9}
 
     /* Layout */
     .wrap{
-      display:grid; grid-template-columns: 3fr 1.2fr; gap:18px;
+      display:grid; grid-template-columns: 3fr 1.15fr; gap:18px;
       max-width:1400px; margin:16px auto; padding:16px;
     }
     .left{
@@ -67,102 +67,127 @@
       display:flex; flex-direction:column; gap:12px; max-height: calc(100vh - 100px);
     }
 
-    /* Products grid */
+    /* Toolbar + search */
     .toolbar{display:flex; align-items:center; gap:10px; margin-bottom:12px}
     .search{
-      flex:1; background:#0b1327; border:1px solid #223057; color:var(--ink);
+      flex:1; background:#0e131c; border:1px solid #22304a; color:#e9eef4;
       padding:10px 12px; border-radius:12px; outline:none;
     }
+    .badge{font-size:12px; color:#b8bfca}
+
+    /* Category blocks */
+    .category{
+      margin:12px 0 18px 0;
+      border:1px solid #1f2838; border-radius:16px; background:#0e1219;
+    }
+    .cat-head{
+      position:sticky; top:76px; z-index:1;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 14px; border-bottom:1px solid #1f2838;
+      background:linear-gradient(180deg,#0f141e,#0e1219);
+      border-top-left-radius:16px; border-top-right-radius:16px;
+    }
+    .cat-name{font-weight:800; letter-spacing:.3px}
     .grid{
       display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px;
+      padding:12px;
     }
     @media (max-width:1200px){ .grid{ grid-template-columns: repeat(3,1fr); } }
     @media (max-width:1000px){ .wrap{ grid-template-columns: 1fr; } .right{ position:relative; top:0 } }
     @media (max-width:800px){ .grid{ grid-template-columns: repeat(2,1fr); } }
 
+    /* Product card — SOLO nombre sobre tarjeta clara (alto contraste) */
     .card{
-      background:linear-gradient(180deg,#1a243d,#1f2937);
-      border:1px solid #263656; border-radius:16px; padding:16px; cursor:pointer;
-      min-height:82px; display:flex; align-items:center; justify-content:center; text-align:center;
-      font-weight:700; letter-spacing:.3px; box-shadow: var(--shadow);
-      transition: transform .08s ease, border-color .2s ease;
+      background:var(--card);
+      color:var(--ink);
+      border:2px solid #e2e5e9;
+      border-radius:18px; padding:18px; cursor:pointer;
+      min-height:84px; display:flex; align-items:center; justify-content:center; text-align:center;
+      font-weight:900; letter-spacing:.2px; box-shadow: 0 6px 14px rgba(0,0,0,.15);
+      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
+      text-transform: uppercase;
     }
-    .card:hover{ transform: translateY(-2px); border-color:#415a93; }
-    .tag{font-size:12px; color:var(--muted); margin-top:6px}
+    .card:hover{ transform: translateY(-2px); border-color: var(--brand); box-shadow:0 10px 24px rgba(0,0,0,.25); }
+    .card:focus-visible{ outline:3px solid var(--brand); outline-offset:2px }
 
     /* Order panel */
-    .order-title{font-weight:800; font-size:20px; letter-spacing:.6px}
+    .order-title{font-weight:900; font-size:20px; letter-spacing:.6px}
     .order-list{display:flex; flex-direction:column; gap:10px; overflow:auto; padding-right:2px}
     .line{
       display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:center;
-      background:#0b1327; border:1px solid #223057; border-radius:12px; padding:10px 12px;
+      background:#0b1018; border:1px solid #213045; border-radius:12px; padding:10px 12px;
     }
     .line h4{margin:0; font-size:14px}
-    .line .muted{color:var(--muted); font-size:12px}
+    .line .muted{color:#93a0b2; font-size:12px}
     .qty{
       display:flex; align-items:center; gap:6px;
-      background:#0b1225; border:1px solid #2a3554; border-radius:10px; padding:4px 6px;
+      background:#0a0f17; border:1px solid #253144; border-radius:10px; padding:4px 6px;
     }
-    .qty button{background:transparent; color:var(--ink); border:none; font-size:16px; cursor:pointer}
-    .line .price{min-width:88px; text-align:right; font-variant-numeric: tabular-nums; font-weight:700}
-    .remove{background:transparent; border:none; color:#fca5a5; cursor:pointer; margin-left:6px}
-    .totals{margin-top:6px; border-top:1px dashed #334155; padding-top:10px; display:flex; justify-content:space-between; align-items:center}
-    .total{font-size:18px; font-weight:900}
+    .qty button{background:transparent; color:#e9eef4; border:none; font-size:16px; cursor:pointer}
+    .line .price{min-width:88px; text-align:right; font-variant-numeric: tabular-nums; font-weight:800}
+    .remove{background:transparent; border:none; color:#f3a3a3; cursor:pointer; margin-left:6px}
+    .totals{margin-top:6px; border-top:1px dashed #344055; padding-top:10px; display:flex; justify-content:space-between; align-items:center}
+    .total{font-size:18px; font-weight:900; color:var(--brand)}
 
-    .print-btn{margin-top:6px}
-
-    /* Modal */
+    /* Modal con botones de tamaño */
     .modal{
       position:fixed; inset:0; display:none; align-items:center; justify-content:center;
       background:rgba(0,0,0,.5); z-index:60; padding:16px;
     }
     .modal.open{display:flex}
     .modal-card{
-      width:min(520px, 96vw); background:var(--panel); border:1px solid #223057; border-radius:18px; padding:18px; box-shadow: var(--shadow);
+      width:min(560px, 96vw);
+      background:#0f141d; border:1px solid #233149; border-radius:18px; padding:18px; box-shadow: var(--shadow);
       display:flex; flex-direction:column; gap:12px;
     }
-    .modal .title{font-size:18px; font-weight:800}
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    select, input[type="number"]{
-      background:#0b1327; border:1px solid #223057; color:var(--ink);
-      padding:8px 10px; border-radius:10px; outline:none;
+    .modal .title{font-size:18px; font-weight:900}
+    .size-grid{
+      display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:10px;
     }
+    @media (max-width:480px){ .size-grid{ grid-template-columns: 1fr; } }
+    .size-btn{
+      border:2px solid #2a3a52; background:#0b1018; color:#e9eef4;
+      padding:12px; border-radius:12px; cursor:pointer; text-align:center; font-weight:800;
+    }
+    .size-btn strong{display:block; color:var(--brand); font-size:13px; margin-top:4px}
+    .size-btn:hover{border-color:var(--brand)}
+    .qty-row{display:flex; align-items:center; gap:10px; margin-top:4px}
+    .qty-box{
+      display:flex; align-items:center; gap:6px;
+      background:#0a0f17; border:1px solid #253144; border-radius:10px; padding:6px 8px;
+    }
+    .qty-box input{width:64px; background:transparent; border:none; color:#e9eef4; font-weight:700; text-align:center; outline:none}
+    .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:4px}
 
     /* Print styles */
     @media print{
       body{background:white}
       .topbar, .left, .btn, .toolbar{ display:none !important; }
-      .right{
-        position:static; box-shadow:none; border:none; padding:0; margin:0; width:100%;
-      }
-      .ticket{
-        width: 72mm;  /* ancho típico de impresora térmica */
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-        color:#000; background:#fff;
-      }
+      .right{ position:static; box-shadow:none; border:none; padding:0; margin:0; width:100%; }
+      .ticket{ width:72mm; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; color:#000; background:#fff; }
       .ticket h2{margin:0 0 6px 0}
       .line{border:none; background:#fff; padding:4px 0}
       .remove, .qty{display:none}
       .totals{border-top:1px solid #000}
       .print-note{display:block}
     }
-    .print-note{display:none; color:#475569; font-size:12px}
-    .small{font-size:12px; color:var(--muted)}
+    .print-note{display:none; color:#8a94a3; font-size:12px}
+    .small{font-size:12px; color:#b7bfca}
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="logo"></div>
+      <!-- Sube tu archivo como 'logo.png' junto a este index.html o reemplaza el src por un data-URI -->
+      <img src="logo.png" alt="Logo Pizza Gourmet Longchamps" />
       <div>
-        <div>Pizza Gourmet Longchamps</div>
-        <div class="small">Comandas · Pizzería & Empanadería</div>
+        <div class="title">Pizza Gourmet Longchamps</div>
+        <div class="subtitle">PIZZAS Y EMPANADAS GOURMET</div>
       </div>
     </div>
     <div class="actions">
-      <!-- Enlace directo a TU Google Sheet para editar precios -->
-      <a class="btn btn-accent" id="editLink" href="#" target="_blank" rel="noopener">Editar precios</a>
-      <button class="btn btn-ghost" id="reloadBtn" title="Recargar datos">&#x21bb; Recargar</button>
+      <a class="btn btn-brand" id="editLink" href="#" target="_blank" rel="noopener">Editar precios</a>
+      <button class="btn" id="reloadBtn" title="Recargar datos">&#x21bb; Recargar</button>
     </div>
   </header>
 
@@ -170,9 +195,10 @@
     <section class="left">
       <div class="toolbar">
         <input id="search" class="search" type="search" placeholder="Buscar producto…" />
-        <span class="small" id="countBadge">0 productos</span>
+        <span class="badge" id="countBadge">0 productos</span>
       </div>
-      <div id="grid" class="grid" aria-live="polite"></div>
+      <!-- Secciones por categoría -->
+      <div id="categories"></div>
       <div class="small" id="status"></div>
     </section>
 
@@ -184,29 +210,31 @@
         <span>Total</span>
         <span id="total" class="total">$ 0,00</span>
       </div>
-      <div class="row">
+      <div class="row" style="display:flex; gap:8px">
         <button class="btn btn-danger" id="clearBtn">Vaciar</button>
-        <button class="btn btn" id="printBtn">Imprimir</button>
+        <button class="btn" id="printBtn">Imprimir</button>
       </div>
       <div class="print-note">— Fin de ticket —</div>
     </aside>
   </main>
 
-  <!-- Modal de selección -->
-  <div class="modal" id="modal">
-    <div class="modal-card">
+  <!-- Modal -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="title" id="modalTitle">Añadir producto</div>
-      <div class="row">
-        <label for="sizeSel">Tamaño</label>
-        <select id="sizeSel"></select>
+      <div class="size-grid" id="sizeGrid"></div>
+
+      <div class="qty-row">
+        <span>Cantidad</span>
+        <div class="qty-box">
+          <button class="btn" id="mMinus" style="padding:4px 8px">−</button>
+          <input id="qtyInp" type="number" min="1" value="1" />
+          <button class="btn" id="mPlus" style="padding:4px 8px">+</button>
+        </div>
       </div>
-      <div class="row">
-        <label for="qtyInp">Cantidad</label>
-        <input id="qtyInp" type="number" min="1" value="1" />
-      </div>
-      <div class="row" style="justify-content:flex-end">
-        <button class="btn" id="addBtn">Agregar</button>
-        <button class="btn btn-ghost" id="cancelBtn">Cancelar</button>
+
+      <div class="modal-actions">
+        <button class="btn" id="cancelBtn">Cancelar</button>
       </div>
     </div>
   </div>
@@ -215,31 +243,18 @@
   (function(){
     // === CONFIG ===
     const SHEET_ID = "1vq34RVaka0N-5kX6BNXQzVrcjRKPvASZ1xJU4K6tg8M";
-    // Si querés fijar una pestaña específica, poné el GID correspondiente:
-    // Ej: const GID = "0"; y usá buildGVizUrl(true)
-    const GID = null; // dejar en null para tomar la primera hoja
+    const GID = null; // si querés fijar pestaña concreta, reemplazar por el gid (string ej: "0")
     const SHEET_EDIT_URL = "https://docs.google.com/spreadsheets/d/1vq34RVaka0N-5kX6BNXQzVrcjRKPvASZ1xJU4K6tg8M/edit?usp=sharing";
 
     // === STATE ===
-    let rawRows = [];            // filas crudas de la hoja
-    let products = [];           // productos agrupados [{producto, variantes:[{tamano, precio, categoria}]}]
-    let cart = [];               // [{producto, tamano, cantidad, precio}]
-    let currentPick = null;      // {producto, variantes}
+    let products = [];        // [{producto, variantes:[{tamano, precio, categoria}], categoria}]
+    let byCategory = [];      // [{categoria, items:[product,...]}]
+    let cart = [];            // [{producto, tamano, precio, cantidad}]
+    let currentItem = null;   // {producto, variantes, categoria}
 
     // === HELPERS ===
     const $ = sel => document.querySelector(sel);
-    const nf = new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS', minimumFractionDigits:2 });
-
-    function buildGVizUrl(useGid=false){
-      if(useGid && GID){
-        // Forzar una pestaña concreta
-        return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${encodeURIComponent(GID)}&tqx=out:json`;
-      }
-      // Primera hoja por defecto
-      return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-    }
-
-    function setStatus(msg){ $("#status").textContent = msg || ""; }
+    const nf = new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',minimumFractionDigits:2});
 
     function normalizeKey(s){
       return String(s||"").trim().toLowerCase()
@@ -249,85 +264,84 @@
         .replace(/[úùü]/g,"u").replace(/ñ/g,"n");
     }
 
-    function mapRowToObj(row, colMap){
-      // row.c -> array de celdas {v:valor}
-      const c = row.c || [];
-      return {
-        categoria : String(c[colMap.categoria]?.v ?? "").trim(),
-        producto  : String(c[colMap.producto]?.v ?? "").trim(),
-        tamano    : String(c[colMap.tamano]?.v ?? "").trim(),
-        precio    : Number(c[colMap.precio]?.v ?? c[colMap.precio]?.f ?? 0)
-      };
+    function buildGVizUrl(useGid=false){
+      return useGid && GID
+        ? `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${encodeURIComponent(GID)}&tqx=out:json`
+        : `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
     }
 
+    function setStatus(msg){ $("#status").textContent = msg || ""; }
+
     function buildColMap(table){
-      // Intenta mapear por labels; si no, usa índices 0..3
-      const want = ["categoria","producto","tamano","tamaño","precio","tamano"]; // contemplar variantes
-      const cols = (table.cols || []).map((col, idx) => {
-        const key = normalizeKey(col.label || "");
-        return { idx, key };
-      });
-
-      // Buscar matches por nombre
-      const findIdx = (names) => {
-        for(const name of names){
-          const n = normalizeKey(name);
-          const hit = cols.find(c => c.key === n);
-          if(hit) return hit.idx;
-        }
-        return null;
-      };
-
-      let m = {
-        categoria: findIdx(["categoria"]),
-        producto : findIdx(["producto"]),
-        tamano   : findIdx(["tamano","tamaño"]),
-        precio   : findIdx(["precio"])
-      };
-
-      // Fallback si no encontró labels
-      if([m.categoria,m.producto,m.tamano,m.precio].some(v => v == null)){
-        m = { categoria:0, producto:1, tamano:2, precio:3 };
-      }
+      const cols = (table.cols||[]).map((c,i)=>({i, key:normalizeKey(c.label||"")}));
+      const find = (...names)=>{ const set = names.map(n=>normalizeKey(n)); const hit = cols.find(c=> set.includes(c.key)); return hit?hit.i:null; }
+      let m = { categoria:find("categoria"), producto:find("producto"), tamano:find("tamano","tamaño"), precio:find("precio") };
+      if([m.categoria,m.producto,m.tamano,m.precio].some(v=>v==null)) m = {categoria:0, producto:1, tamano:2, precio:3};
       return m;
     }
 
-    function groupProducts(rows){
-      // Agrupar por nombre de producto
+    function mapRow(row, map){
+      const c=row.c||[];
+      return {
+        categoria : String(c[map.categoria]?.v ?? "").trim(),
+        producto  : String(c[map.producto]?.v ?? "").trim(),
+        tamano    : String(c[map.tamano]?.v ?? "").trim(),
+        precio    : Number(c[map.precio]?.v ?? c[map.precio]?.f ?? 0)
+      };
+    }
+
+    function group(rows){
+      // Agrupar por producto
       const byName = new Map();
       for(const r of rows){
         if(!r.producto) continue;
         const key = r.producto.trim();
-        if(!byName.has(key)) byName.set(key, []);
-        byName.get(key).push({ tamano:r.tamano || "", precio:Number(r.precio)||0, categoria:r.categoria||"" });
+        if(!byName.has(key)) byName.set(key, { producto:key, categoria:r.categoria||"", variantes:[] });
+        byName.get(key).variantes.push({ tamano:r.tamano||"", precio:Number(r.precio)||0, categoria:r.categoria||"" });
       }
-      const out = [];
-      [...byName.entries()].forEach(([producto, variantes])=>{
-        // Ordenar variantes por precio asc
-        variantes.sort((a,b)=> (a.precio||0)-(b.precio||0));
-        out.push({ producto, variantes });
-      });
-      // Orden alfabético
-      out.sort((a,b)=> a.producto.localeCompare(b.producto,'es'));
-      return out;
+      const list = [...byName.values()];
+      list.forEach(p=> p.variantes.sort((a,b)=> (a.precio||0)-(b.precio||0)));
+      list.sort((a,b)=> a.producto.localeCompare(b.producto,'es'));
+      // Agrupar por categoría
+      const cats = new Map();
+      for(const it of list){
+        const cat = it.categoria || "Otros";
+        if(!cats.has(cat)) cats.set(cat, []);
+        cats.get(cat).push(it);
+      }
+      const catList = [...cats.entries()].map(([categoria,items])=>({categoria,items})).sort((a,b)=>a.categoria.localeCompare(b.categoria,'es'));
+      return { list, catList };
     }
 
-    function renderGrid(list){
-      const grid = $("#grid");
-      grid.innerHTML = "";
-      list.forEach(item=>{
-        const div = document.createElement("button");
-        div.className = "card";
-        div.type = "button";
-        div.setAttribute("aria-label", `Agregar ${item.producto}`);
-        div.innerHTML = `<div>
-          <div>${item.producto}</div>
-          <div class="tag">${item.variantes.length ? (item.variantes[0].tamano || "—") : "—"}</div>
-        </div>`;
-        div.addEventListener("click", ()=> openModal(item));
-        grid.appendChild(div);
+    // === RENDER ===
+    function renderCategories(catBlocks){
+      const root = $("#categories");
+      root.innerHTML = "";
+      catBlocks.forEach(block=>{
+        const wrap = document.createElement("section");
+        wrap.className = "category";
+
+        const head = document.createElement("div");
+        head.className = "cat-head";
+        head.innerHTML = `<div class="cat-name">${block.categoria}</div><div class="badge">${block.items.length} producto${block.items.length===1?"":"s"}</div>`;
+        wrap.appendChild(head);
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+        block.items.forEach(item=>{
+          const card = document.createElement("button");
+          card.className = "card"; card.type="button";
+          card.textContent = item.producto; // SOLO nombre
+          card.addEventListener("click", ()=> openModal(item));
+          grid.appendChild(card);
+        });
+        wrap.appendChild(grid);
+        root.appendChild(wrap);
       });
-      $("#countBadge").textContent = `${list.length} producto${list.length===1?"":"s"}`;
+
+      // contador total
+      const total = catBlocks.reduce((a,b)=>a+b.items.length,0);
+      $("#countBadge").textContent = `${total} producto${total===1?"":"s"}`;
     }
 
     function renderCart(){
@@ -345,18 +359,16 @@
         const minus = document.createElement("button"); minus.textContent = "−";
         const span  = document.createElement("span"); span.textContent = it.cantidad;
         const plus  = document.createElement("button"); plus.textContent = "+";
-        minus.addEventListener("click", ()=> changeQty(idx, -1));
-        plus.addEventListener("click", ()=> changeQty(idx, +1));
-        qty.append(minus, span, plus);
+        minus.addEventListener("click", ()=> changeQty(idx,-1));
+        plus.addEventListener("click", ()=> changeQty(idx,+1));
+        qty.append(minus,span,plus);
 
         const price = document.createElement("div");
         price.className = "price";
         price.textContent = nf.format(it.cantidad * it.precio);
 
         const rm = document.createElement("button");
-        rm.className = "remove";
-        rm.title = "Quitar";
-        rm.textContent = "✕";
+        rm.className = "remove"; rm.title="Quitar"; rm.textContent="✕";
         rm.addEventListener("click", ()=> removeLine(idx));
 
         line.append(left, qty, price, rm);
@@ -367,121 +379,107 @@
       $("#total").textContent = nf.format(total);
     }
 
-    function changeQty(idx, delta){
-      cart[idx].cantidad += delta;
-      if(cart[idx].cantidad <= 0){ cart.splice(idx,1); }
-      renderCart();
-      persistCart();
+    function changeQty(i, d){
+      cart[i].cantidad += d;
+      if(cart[i].cantidad<=0) cart.splice(i,1);
+      renderCart(); persistCart();
     }
-    function removeLine(idx){
-      cart.splice(idx,1);
-      renderCart();
-      persistCart();
-    }
-
-    function addToCart(producto, tamano, precio, cantidad){
-      // Si ya existe misma línea (producto+tamano+precio), sumar cantidad
-      const i = cart.findIndex(it=> it.producto===producto && it.tamano===tamano && it.precio===precio);
-      if(i>=0){ cart[i].cantidad += cantidad; }
-      else { cart.push({ producto, tamano, precio, cantidad }); }
-      renderCart();
-      persistCart();
+    function removeLine(i){ cart.splice(i,1); renderCart(); persistCart(); }
+    function addToCart(producto,tamano,precio,cantidad){
+      const k = cart.findIndex(it=> it.producto===producto && it.tamano===tamano && it.precio===precio);
+      if(k>=0) cart[k].cantidad += cantidad;
+      else cart.push({ producto, tamano, precio, cantidad });
+      renderCart(); persistCart();
     }
 
-    // === MODAL ===
+    // === MODAL: botones de tamaño ===
     function openModal(item){
-      currentPick = item;
+      currentItem = item;
       $("#modalTitle").textContent = item.producto;
-      const sel = $("#sizeSel");
-      sel.innerHTML = "";
-      (item.variantes.length ? item.variantes : [{tamano:"Único", precio: item.variantes?.[0]?.precio || 0}])
-        .forEach(v=>{
-          const opt = document.createElement("option");
-          const labelTam = v.tamano || "Único";
-          opt.value = JSON.stringify({tamano:labelTam, precio:Number(v.precio)||0});
-          opt.textContent = `${labelTam} — ${nf.format(Number(v.precio)||0)}`;
-          sel.appendChild(opt);
-        });
       $("#qtyInp").value = 1;
-      $("#modal").classList.add("open");
-    }
-    function closeModal(){ $("#modal").classList.remove("open"); currentPick=null; }
+      const grid = $("#sizeGrid"); grid.innerHTML = "";
+      const variants = item.variantes.length ? item.variantes : [{tamano:"Único",precio:item.variantes?.[0]?.precio||0}];
 
-    $("#addBtn").addEventListener("click", ()=>{
-      try{
-        const { tamano, precio } = JSON.parse($("#sizeSel").value || "{}");
-        const qty = Math.max(1, parseInt($("#qtyInp").value||"1",10));
-        if(!currentPick) return;
-        addToCart(currentPick.producto, tamano, Number(precio)||0, qty);
-      }catch(e){}
-      closeModal();
-    });
+      variants.forEach(v=>{
+        const btn = document.createElement("button");
+        btn.className = "size-btn"; btn.type="button";
+        const label = v.tamano || "Único";
+        btn.innerHTML = `${label}<strong>${nf.format(Number(v.precio)||0)}</strong>`;
+        btn.addEventListener("click", ()=>{
+          const qty = Math.max(1, parseInt($("#qtyInp").value||"1",10));
+          addToCart(item.producto, label, Number(v.precio)||0, qty);
+          closeModal();
+        });
+        grid.appendChild(btn);
+      });
+
+      $("#modal").classList.add("open");
+      $("#modal").setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      $("#modal").classList.remove("open");
+      $("#modal").setAttribute("aria-hidden","true");
+      currentItem = null;
+    }
     $("#cancelBtn").addEventListener("click", closeModal);
     $("#modal").addEventListener("click", (e)=>{ if(e.target===e.currentTarget) closeModal(); });
     window.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
 
+    // cantidad en modal
+    $("#mMinus").addEventListener("click", ()=> { const el=$("#qtyInp"); el.value = Math.max(1, (parseInt(el.value||"1",10)-1)); });
+    $("#mPlus").addEventListener("click", ()=> { const el=$("#qtyInp"); el.value = Math.max(1, (parseInt(el.value||"1",10)+1)); });
+
     // === STORAGE ===
     function persistCart(){ localStorage.setItem("pgl_cart", JSON.stringify(cart)); }
     function restoreCart(){
-      try{
-        const raw = localStorage.getItem("pgl_cart");
-        cart = raw ? JSON.parse(raw) : [];
-      }catch{ cart = []; }
+      try{ cart = JSON.parse(localStorage.getItem("pgl_cart")||"[]"); }catch{ cart=[]; }
       renderCart();
     }
 
-    // === FETCH ===
+    // === FETCH SHEET ===
     async function fetchSheet(){
       setStatus("Cargando productos…");
       try{
-        const url = buildGVizUrl(Boolean(GID));
-        const res = await fetch(url);
+        const res = await fetch(buildGVizUrl(Boolean(GID)));
         if(!res.ok) throw new Error("No se pudo leer la hoja (revisá permisos).");
         const text = await res.text();
-
-        // gviz devuelve algo como: google.visualization.Query.setResponse({...});
-        const jsonStr = text.replace(/^[\s\S]*setResponse\(/, "").replace(/\);?\s*$/, "");
+        const jsonStr = text.replace(/^[\s\S]*setResponse\(/,"").replace(/\);?\s*$/,"");
         const data = JSON.parse(jsonStr);
         const table = data.table;
-        const colMap = buildColMap(table);
-        const rows = (table.rows || [])
-          .map(r=> mapRowToObj(r, colMap))
-          // Filtrar filas vacías
+        const map = buildColMap(table);
+        const rows = (table.rows||[])
+          .map(r=> mapRow(r,map))
           .filter(r=> r.producto);
 
-        rawRows = rows;
-        products = groupProducts(rows);
-        renderGrid(products);
-        setStatus(products.length ? "" : "No se encontraron productos.");
+        const { list, catList } = group(rows);
+        products = list; byCategory = catList;
+
+        renderCategories(byCategory);
+        setStatus(byCategory.length ? "" : "No se encontraron productos.");
       }catch(err){
         console.error(err);
         setStatus("Error al cargar datos. Verificá que el archivo esté compartido como 'Cualquiera con el enlace (lector)'.");
       }
     }
 
-    // === SEARCH ===
+    // === SEARCH por nombre (filtra dentro de cada categoría) ===
     $("#search").addEventListener("input", (e)=>{
       const q = normalizeKey(e.target.value);
-      const filtered = !q ? products :
-        products.filter(p=> normalizeKey(p.producto).includes(q));
-      renderGrid(filtered);
+      const filtered = !q ? byCategory : byCategory.map(c=>({
+        categoria:c.categoria,
+        items:c.items.filter(p=> normalizeKey(p.producto).includes(q))
+      })).filter(c=> c.items.length);
+      renderCategories(filtered);
     });
 
-    // === TOP ACTIONS ===
+    // === TOP / ORDER ===
     $("#editLink").href = SHEET_EDIT_URL;
     $("#reloadBtn").addEventListener("click", fetchSheet);
-
-    // === ORDER ACTIONS ===
-    $("#clearBtn").addEventListener("click", ()=>{
-      if(confirm("¿Vaciar comanda?")){ cart = []; renderCart(); persistCart(); }
-    });
-
-    // === PRINT ===
+    $("#clearBtn").addEventListener("click", ()=>{ if(confirm("¿Vaciar comanda?")){ cart=[]; renderCart(); persistCart(); }});
     $("#printBtn").addEventListener("click", ()=>{
-      // Antes de imprimir, forzamos estilos de ticket dentro del panel derecho
       document.querySelector(".right").classList.add("ticket");
       window.print();
-      setTimeout(()=> document.querySelector(".right").classList.remove("ticket"), 0);
+      setTimeout(()=> document.querySelector(".right").classList.remove("ticket"),0);
     });
 
     // === INIT ===
