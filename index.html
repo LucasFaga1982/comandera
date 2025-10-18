@@ -1,390 +1,405 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sistema de Comandas - Pizzería Gourmet</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-  body { font-family: 'Roboto', sans-serif; }
-  h1,h2,h3 { font-family: 'Roboto Slab', serif; }
-  .btn-spinner { animation: spin 1s linear infinite; }
-  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pizza Gourmet Longchamps — Comandas</title>
+  <style>
+    :root{
+      --bg:#0f172a;          /* slate-900 */
+      --panel:#111827;       /* gray-900 */
+      --card:#1f2937;        /* gray-800 */
+      --muted:#94a3b8;       /* slate-400 */
+      --text:#f8fafc;        /* slate-50 */
+      --accent:#ef9963;      /* Naty palette */
+      --accent-2:#4d3069;    /* Naty palette */
+      --ok:#22c55e;          /* green-500 */
+      --warn:#f59e0b;        /* amber-500 */
+      --danger:#ef4444;      /* red-500 */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; background:linear-gradient(135deg,var(--bg),#060b25 60%);
+      color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      display:flex; flex-direction:column;
+    }
+    header{
+      display:flex; align-items:center; gap:12px; justify-content:space-between;
+      padding:16px 22px; background:transparent; position:sticky; top:0; backdrop-filter: blur(6px);
+      z-index:30; border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .brand{display:flex; align-items:baseline; gap:10px}
+    .brand h1{margin:0; font-size:20px; letter-spacing:.4px}
+    .brand small{color:var(--muted)}
+    .actions{display:flex; gap:10px; align-items:center}
+    .btn{
+      border:none; border-radius:14px; padding:10px 14px; cursor:pointer; font-weight:600; 
+      background:var(--accent); color:#111; box-shadow:var(--shadow); transition:transform .05s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.alt{background:var(--accent-2); color:#fff}
+    .btn.ghost{background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.15)}
 
-  /* Botones de producto: forzar texto en varias líneas y sin recorte */
-  .producto-btn { white-space: normal; text-align: left; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; }
+    .layout{display:grid; grid-template-columns: 1.2fr .8fr; gap:18px; padding:18px;}
+    @media(max-width: 980px){ .layout{grid-template-columns:1fr;}}
 
-  /* Modal básico */
-  .modal-bg { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; }
-  .modal { background:white; border-radius: 8px; padding:1rem; max-width:520px; width:95%; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .panel{background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); box-shadow:var(--shadow)}
 
-  /* Impresión para POS-58 (58mm) */
-  @media print {
-    @page { size: 58mm auto; margin: 0; }
-    body * { visibility: hidden; }
-    #ticket-imprimible, #ticket-imprimible * { visibility: visible; }
-    #ticket-imprimible { position: absolute; left:0; top:0; width:58mm; font-family: 'Courier New', monospace; font-size: 12px; color:#000; padding:6px; box-sizing:border-box; }
-    #ticket-imprimible h1 { font-size:14px; text-align:center; margin:0 0 4px 0; }
-    #ticket-imprimible p { margin:0; line-height:1.1; }
-    .item-line, .total-line { display:flex; justify-content:space-between; }
-    .total-line { border-top:1px dashed #000; margin-top:5px; padding-top:4px; font-weight:bold; }
-  }
-</style>
+    /* Catálogo */
+    .catalog{
+      padding:18px; min-height:60vh; display:flex; flex-direction:column;
+    }
+    .toolbar{display:flex; gap:10px; align-items:center; margin-bottom:14px}
+    .search{flex:1;}
+    .search input{width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0b1028; color:var(--text)}
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px}
+    .card{
+      background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:16px; cursor:pointer; position:relative; overflow:hidden;
+      min-height:86px; display:flex; align-items:center; justify-content:center; text-align:center; font-weight:700; letter-spacing:.2px
+    }
+    .card:hover{outline:2px solid rgba(239,153,99,.45)}
+    .badge{position:absolute; top:10px; right:10px; font-size:12px; color:var(--muted)}
+
+    /* Comanda */
+    .order{ padding:16px; display:flex; flex-direction:column; gap:12px }
+    .order h3{margin:6px 0 0}
+    .order-list{display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow:auto; padding-right:4px}
+    .item{display:grid; grid-template-columns:1fr auto auto auto; gap:10px; align-items:center; background:#0b1028; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px}
+    .item .name{font-weight:700}
+    .qtyctrl{display:flex; gap:6px; align-items:center}
+    .qtyctrl button{background:#111a3a; color:#fff; border:1px solid rgba(255,255,255,.12); border-radius:9px; width:28px; height:28px; cursor:pointer}
+    .remove{background:transparent; border:none; color:var(--danger); cursor:pointer; font-weight:700}
+    .total{display:flex; justify-content:space-between; align-items:center; gap:12px; border-top:1px dashed rgba(255,255,255,.2); padding-top:12px; margin-top:6px}
+    .total .sum{font-size:20px; font-weight:800}
+
+    .print-hint{color:var(--muted); font-size:12px}
+
+    /* Modal */
+    .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.5); z-index:50}
+    .modal.active{display:grid}
+    .modal .box{background:#0b1028; border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:18px; min-width:320px; max-width:92vw}
+    .box h4{margin:4px 0 12px}
+    .row{display:flex; gap:8px; margin:10px 0}
+    .row select, .row input{flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#0a1436; color:var(--text)}
+
+    /* Vistas */
+    [data-view]{display:none}
+    [data-view].active{display:block}
+
+    /* Editor de precios */
+    .editor{ padding:18px; }
+    .list{ display:grid; gap:8px; }
+    .row-edit{display:grid; grid-template-columns: 1fr 140px 120px 120px; gap:10px; align-items:center; background:#0b1028; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px}
+    .row-edit input{width:100%; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#081133; color:var(--text)}
+    .row-edit .meta{color:var(--muted); font-size:12px}
+    .editor-actions{display:flex; gap:10px; margin-top:12px}
+
+    /* Impresión */
+    @media print{
+      body{background:#fff; color:#000}
+      header, .catalog, .btn-edit, .print-hint{display:none !important}
+      .order{background:#fff; border:none; box-shadow:none}
+      .panel{border:none}
+      .order-list .item{border:1px solid #000}
+      .total{border-top:1px solid #000}
+      [data-view="#pos"], [data-view="#precios"]{display:block}
+    }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800">
-
-<main id="vista-pedidos" class="p-4 md:p-6">
-  <header class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-300">
-    <h1 class="text-3xl font-bold text-slate-900">Pizzería "Gourmet"</h1>
-    <div class="flex gap-2 items-center">
-      <button id="btn-agregar-producto" class="bg-blue-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-        <i class="fas fa-plus"></i> Agregar producto
-      </button>
-      <button id="btn-ir-a-precios" class="bg-slate-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-slate-800 flex items-center gap-2">
-        <i class="fas fa-cog"></i> Actualizar Precios
-      </button>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Pizza Gourmet Longchamps</h1>
+      <small>Comandas & Precios</small>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="reloadBtn" title="Recargar catálogo">↻ Recargar</button>
+      <button class="btn btn-edit" id="toggleEditor">Editar precios</button>
     </div>
   </header>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div id="lista-productos" class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
-      <h2 class="text-2xl font-semibold mb-4">Menú</h2>
-      <div id="categorias-container" class="space-y-8">
-        <div class="text-center p-8">
-          <i class="fas fa-spinner fa-spin text-4xl text-red-700"></i>
-          <p class="mt-3 text-slate-600">Cargando productos...</p>
-        </div>
+  <main class="layout">
+    <!-- Catálogo y cards -->
+    <section class="panel catalog" data-view="#pos">
+      <div class="toolbar">
+        <div class="search"><input id="q" placeholder="Buscar producto…" /></div>
+        <button class="btn alt" id="clearOrder">Vaciar pedido</button>
       </div>
-    </div>
+      <div class="grid" id="cards"></div>
+    </section>
 
-    <aside class="bg-slate-800 text-white p-6 rounded-xl shadow-lg flex flex-col">
-      <h2 class="text-2xl font-semibold mb-4">Comanda Actual</h2>
-      <div id="comanda-items" class="flex-grow min-h-[200px] border-b border-slate-600 pb-4 mb-4 overflow-y-auto">
-        <p id="comanda-vacia" class="text-slate-400 text-center mt-12">Agrega productos del menú para iniciar una comanda.</p>
-      </div>
-      <div class="space-y-4">
-        <div class="flex justify-between items-center text-2xl font-bold">
-          <span>TOTAL:</span>
-          <span id="comanda-total">$0.00</span>
+    <!-- Comanda -->
+    <aside class="panel order">
+      <h3>Comanda</h3>
+      <div class="order-list" id="orderList"></div>
+      <div class="total">
+        <div>
+          <div class="print-hint">Imprime solo esta comanda</div>
+          <strong>Total</strong>
         </div>
-        <button id="btn-imprimir" class="w-full bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2 disabled:bg-slate-500" disabled>
-          <i class="fas fa-print"></i> Imprimir Comanda
-        </button>
-        <button id="btn-limpiar" class="w-full bg-rose-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-rose-700">
-          Limpiar Comanda
-        </button>
+        <div class="sum" id="sumTotal">$0</div>
+      </div>
+      <div class="editor-actions">
+        <button class="btn" id="printBtn">🖨️ Imprimir</button>
       </div>
     </aside>
-  </div>
-</main>
 
-<section id="vista-precios" class="p-4 md:p-6 hidden">
-  <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-300">
-    <h1 class="text-3xl font-bold text-slate-900">Editar Precios</h1>
-    <button id="btn-volver-a-pedidos" class="bg-slate-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-slate-700 flex items-center gap-2">
-      <i class="fas fa-arrow-left"></i> Volver
-    </button>
-  </header>
+    <!-- Editor de Precios -->
+    <section class="panel editor" data-view="#precios">
+      <h3>Editor de precios</h3>
+      <p class="print-hint">Modificá precios en línea. Para agregar productos nuevos: <a id="dbLink" href="#" target="_blank">dirigite a la base de datos</a>.</p>
+      <div class="list" id="priceList"></div>
+      <div class="editor-actions">
+        <button class="btn" id="savePrices">Guardar cambios</button>
+        <button class="btn ghost" id="backPos">Volver a comandas</button>
+      </div>
+      <div id="saveStatus" class="print-hint"></div>
+    </section>
+  </main>
 
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
-    <div id="lista-precios-container" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2"></div>
-    <div id="feedback-precios" class="mt-4 text-center"></div>
-    <div class="mt-6 text-right">
-      <button id="btn-guardar-precios" class="bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 flex items-center gap-2 disabled:bg-slate-500">
-        <i id="save-icon" class="fas fa-save"></i> <span id="save-text">Guardar Cambios</span>
-      </button>
-    </div>
-  </div>
-</section>
-
-<!-- Modal Agregar Producto -->
-<div id="modal-agregar" class="hidden">
-  <div class="modal-bg">
-    <div class="modal">
-      <h3 class="text-xl font-bold mb-3">Agregar Producto</h3>
-      <div class="space-y-3">
-        <div><label class="block text-sm font-medium">Categoría</label><input id="input-cat" class="w-full border p-2 rounded" /></div>
-        <div><label class="block text-sm font-medium">Nombre del producto</label><input id="input-prod" class="w-full border p-2 rounded" /></div>
-        <div><label class="block text-sm font-medium">Tamaño</label><input id="input-tam" class="w-full border p-2 rounded" /></div>
-        <div><label class="block text-sm font-medium">Precio</label><input id="input-precio" type="number" step="0.01" class="w-full border p-2 rounded" /></div>
-        <div class="flex justify-end gap-2 mt-3">
-          <button id="cancel-add" class="px-4 py-2 rounded border">Cancelar</button>
-          <button id="confirm-add" class="px-4 py-2 bg-blue-600 text-white rounded">Agregar</button>
-        </div>
+  <!-- Modal Selección -->
+  <div class="modal" id="modal">
+    <div class="box">
+      <h4 id="modalTitle">Agregar</h4>
+      <div class="row">
+        <select id="sizeSelect"></select>
+        <input id="qtyInput" type="number" min="1" value="1" />
+      </div>
+      <div class="row" style="justify-content:flex-end">
+        <button class="btn ghost" id="cancelModal">Cancelar</button>
+        <button class="btn" id="confirmModal">Agregar</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Ticket imprimible -->
-<div id="ticket-imprimible" class="hidden"></div>
+  <script>
+    // ======= CONFIG =======
+    const DB_URL = "https://script.google.com/macros/s/AKfycbzD7mn33jI9rPVzmo4n-ZhaKHIgvNvmFy90KjXrUn_o-jKSfdywUx8lBytFbxTAfvDk8A/exec"; // listado
+    const DB_URL_EDIT = DB_URL;   // mismo endpoint para POST (deberás habilitar en Apps Script)
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // --- CONFIG ---
-  const URL_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpTRK2Hf7YmhcCExgsz0-GNJjeLXN3LCPw2J3z0Tp5t_WQyny9vh4T5QWM6W9diJntg5yD3THw-LqP/pub?output=csv';
-  // REEMPLAZA esta URL con la URL que obtengas al desplegar tu Apps Script web app
-  let APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzD7mn33jI9rPVzmo4n-ZhaKHIgvNvmFy90KjXrUn_o-jKSfdywUx8lBytFbxTAfvDk8A/exec';
+    // ======= ESTADO =======
+    let rawRows = [];       // filas crudas: {categoria, producto, tamano, precio}
+    let catalog = [];       // variantes con id compuesto
+    let byProduct = new Map(); // nombre -> variantes
+    let order = [];         // {id, producto, tamano, precio, qty}
 
-  let productos = [];
-  let comanda = [];
+    // ======= UTILS =======
+    const peso = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n||0);
+    const keyOf = (r)=> `${r.categoria}__${r.producto}__${r.tamano}`;
+    const $(id)=>document.getElementById(id);
+  </script>
+  <script>
+    // Fallback for the short helper (since HTML validators may complain)
+    function $(id){ return document.getElementById(id); }
 
-  const a = id => document.getElementById(id);
-  const vistaPedidos = a('vista-pedidos'), vistaPrecios = a('vista-precios');
-  const categoriasContainer = a('categorias-container'), comandaItemsContainer = a('comanda-items');
-  const comandaTotalEl = a('comanda-total'), comandaVaciaEl = a('comanda-vacia');
-  const listaPreciosContainer = a('lista-precios-container'), btnImprimir = a('btn-imprimir');
-  const btnLimpiar = a('btn-limpiar'), ticketImprimibleContainer = a('ticket-imprimible');
-  const btnGuardarPrecios = a('btn-guardar-precios');
-
-  // navegación
-  a('btn-ir-a-precios').addEventListener('click', ()=> cambiarVista('precios'));
-  a('btn-volver-a-pedidos').addEventListener('click', ()=> cambiarVista('pedidos'));
-  a('btn-agregar-producto').addEventListener('click', ()=> showModal(true));
-
-  function cambiarVista(vista) {
-    if (vista === 'precios') {
-      vistaPedidos.classList.add('hidden');
-      vistaPrecios.classList.remove('hidden');
-      renderizarEditorDePrecios();
-    } else {
-      vistaPrecios.classList.add('hidden');
-      vistaPedidos.classList.remove('hidden');
-      iniciarApp();
-    }
-  }
-
-  // modal add
-  function showModal(show) {
-    const modal = a('modal-agregar');
-    if (show) {
-      modal.classList.remove('hidden');
-    } else {
-      modal.classList.add('hidden');
-      ['input-cat','input-prod','input-tam','input-precio'].forEach(id => a(id).value = '');
-    }
-  }
-  a('cancel-add').addEventListener('click', ()=> showModal(false));
-  a('confirm-add').addEventListener('click', async () => {
-    const cat = a('input-cat').value.trim();
-    const prod = a('input-prod').value.trim();
-    const tam = a('input-tam').value.trim();
-    const precio = parseFloat(a('input-precio').value) || 0;
-    if (!cat || !prod || !tam) { alert('Completá categoría, producto y tamaño.'); return; }
-
-    // Generar ID automático (producto - tamaño)
-    const id = `${prod} - ${tam}`;
-    // Primero actualizar UI local
-    const nuevo = { id, categoria: cat, producto: prod, tamano: tam, precio };
-    productos.push(nuevo);
-    renderizarProductos();
-
-    // Enviar al Apps Script para agregar a la hoja
-    try {
-      const resp = await fetch(APPS_SCRIPT_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ action:'add_product', product: nuevo })
-      });
-      const json = await resp.json();
-      if (json.ok) { showModal(false); alert('Producto agregado correctamente.'); }
-      else alert('Ocurrió un problema al agregar en la sheet.');
-    } catch (e) {
-      console.error(e);
-      alert('Error al comunicarse con el servidor. Revisa el Apps Script y CORS.');
-    }
-  });
-
-  // cargar CSV
-  async function cargarProductos() {
-    try {
-      const response = await fetch(`${URL_SHEET}&t=${new Date().getTime()}`);
-      if (!response.ok) throw new Error('Error al cargar CSV');
-      const csvText = await response.text();
-      productos = parseCSV(csvText);
-      renderizarProductos();
-    } catch (err) {
-      console.error(err);
-      categoriasContainer.innerHTML = `<p class="text-red-600 text-center font-semibold">No se pudieron cargar los productos. Revisa la URL o tu conexión.</p>`;
-    }
-  }
-
-  function parseCSV(text) {
-    // robusto: aceptamos comas dentro de campos entre comillas (simple)
-    const lines = text.trim().split('\n');
-    const rows = lines.slice(1).map(line => {
-      // split respetando comillas simples y dobles (simple split CSV)
-      const cols = line.split(',').map(c => c.replace(/^"(.*)"$/, '$1').trim());
-      if (cols.length < 4) return null;
-      const [cat, prod, tam, precio] = cols;
-      const precioLimpio = precio ? parseFloat(precio.replace(/[\r$]/g,'').trim()) : 0;
-      return { id: `${prod.trim()} - ${tam.trim()}`, categoria: cat.trim(), producto: prod.trim(), tamano: tam.trim(), precio: precioLimpio };
-    }).filter(r => r && r.producto);
-    return rows;
-  }
-
-  function renderizarProductos() {
-    if (!productos.length) {
-      categoriasContainer.innerHTML = `<p class="text-slate-600 text-center">No hay productos cargados.</p>`;
-      return;
-    }
-    const porCategoria = productos.reduce((acc,p)=> { (acc[p.categoria]=acc[p.categoria]||[]).push(p); return acc; }, {});
-    categoriasContainer.innerHTML = Object.keys(porCategoria).map(cat => `
-      <div>
-        <h3 class="text-xl font-bold border-b pb-2 mb-4 text-slate-800">${cat}</h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          ${porCategoria[cat].map(p=> `
-            <button class="producto-btn bg-slate-200 p-3 rounded-lg hover:bg-red-700 hover:text-white transition-all duration-300 shadow focus:outline-none focus:ring-2 focus:ring-red-500 flex flex-col justify-between group"
-                    data-id="${p.id}">
-              <div>
-                <p class="font-semibold">${p.producto}</p>
-                <p class="text-xs text-slate-600 group-hover:text-red-100">${p.tamano}</p>
-              </div>
-              <p class="font-bold text-lg mt-2">$${p.precio.toFixed(2)}</p>
-            </button>
-          `).join('')}
-        </div>
-      </div>
-    `).join('');
-    // Asociar handlers
-    document.querySelectorAll('#lista-productos button[data-id]').forEach(btn=>{
-      btn.addEventListener('click', ()=> agregarAComanda(btn.dataset.id));
-    });
-  }
-
-  // comanda
-  window.agregarAComanda = id => {
-    const producto = productos.find(p => p.id === id);
-    if (!producto) return;
-    const itemExistente = comanda.find(i=>i.id===id);
-    if (itemExistente) itemExistente.cantidad++;
-    else comanda.push({...producto, cantidad:1});
-    renderizarComanda();
-  };
-
-  window.actualizarCantidad = (index,cambio) => {
-    comanda[index].cantidad += cambio;
-    if (comanda[index].cantidad <= 0) comanda.splice(index,1);
-    renderizarComanda();
-  };
-
-  function renderizarComanda() {
-    comandaVaciaEl.classList.toggle('hidden', comanda.length>0);
-    btnImprimir.disabled = comanda.length === 0;
-    comandaItemsContainer.innerHTML = comanda.length === 0 ? comandaVaciaEl.outerHTML : comanda.map((item, index)=>`
-      <div class="flex justify-between items-center py-2 border-b border-slate-600">
-        <div>
-          <p class="font-semibold text-white">${item.producto} <span class="font-normal text-slate-300 text-sm">(${item.tamano})</span></p>
-          <p class="text-sm text-slate-300">
-            <button class="px-2 rounded-full bg-slate-500" onclick="actualizarCantidad(${index}, -1)">-</button>
-            <span class="mx-2 font-bold">${item.cantidad}</span>
-            <button class="px-2 rounded-full bg-slate-500" onclick="actualizarCantidad(${index}, 1)">+</button>
-            x $${item.precio.toFixed(2)}
-          </p>
-        </div>
-        <p class="font-bold text-lg">$${(item.cantidad * item.precio).toFixed(2)}</p>
-      </div>
-    `).join('');
-    const total = comanda.reduce((acc,i)=>acc + (i.cantidad * i.precio),0);
-    comandaTotalEl.textContent = `$${total.toFixed(2)}`;
-  }
-
-  a('btn-limpiar').addEventListener('click', ()=> {
-    if (confirm('¿Limpiar la comanda actual?')) { comanda = []; renderizarComanda(); }
-  });
-
-  // editor de precios
-  function renderizarEditorDePrecios() {
-    listaPreciosContainer.innerHTML = productos.sort((a,b)=>a.id.localeCompare(b.id)).map(p => `
-      <div class="grid grid-cols-3 items-center gap-4 py-2 border-b">
-        <span class="col-span-2 font-medium">${p.id}</span>
-        <div class="flex items-center">
-          <span class="mr-2 text-slate-500">$</span>
-          <input type="number" step="0.01" value="${p.precio.toFixed(2)}" data-producto-id="${p.id}" data-prod="${p.producto}" data-tam="${p.tamano}" class="w-full p-2 border rounded-md">
-        </div>
-      </div>
-    `).join('');
-  }
-
-  btnGuardarPrecios.addEventListener('click', async () => {
-    const inputs = listaPreciosContainer.querySelectorAll('input[data-producto-id]');
-    const feedbackEl = a('feedback-precios');
-    const saveIcon = a('save-icon'), saveText = a('save-text');
-
-    const actualizaciones = Array.from(inputs).map(input => ({
-      id: input.dataset.productoId,
-      producto: input.dataset.prod,
-      tamano: input.dataset.tam,
-      precio: parseFloat(input.value)
-    }));
-
-    // comprobar cambios reales comparando con productos[]
-    const cambios = actualizaciones.filter(a1 => {
-      const origen = productos.find(p=>p.id===a1.id);
-      return origen && origen.precio !== a1.precio;
-    });
-
-    if (cambios.length === 0) { feedbackEl.innerHTML = `<p class="text-blue-600">No hay cambios para guardar.</p>`; return; }
-
-    btnGuardarPrecios.disabled = true; saveText.textContent = 'Guardando...'; saveIcon.className = 'fas fa-spinner btn-spinner';
-    feedbackEl.innerHTML = `<p class="text-slate-600">Actualizando ${cambios.length} producto(s)...</p>`;
-
-    try {
-      const resp = await fetch(APPS_SCRIPT_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ action:'update_prices', updates: cambios })
-      });
-      const json = await resp.json();
-      if (json.ok) {
-        feedbackEl.innerHTML = `<p class="text-green-600 font-bold">¡Precios actualizados con éxito!</p>`;
-        // actualizar la lista local y volver a vista pedidos
-        cambios.forEach(c => {
-          const p = productos.find(x=>x.id===c.id);
-          if (p) p.precio = c.precio;
-        });
-        setTimeout(()=> cambiarVista('pedidos'), 900);
-      } else {
-        throw new Error(json.message || 'Error en respuesta');
+    // Parse CSV robusto (simple)
+    function parseCSV(text){
+      const lines = text.trim().split(/\r?\n/);
+      const out=[];
+      for(let i=1;i<lines.length;i++){
+        const cells = lines[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(s=>s.replace(/^"|"$/g,'').trim());
+        out.push({categoria:cells[0]||'', producto:cells[1]||'', tamano:cells[2]||'', precio: Number(String(cells[3]||'0').replace(/[^0-9.,]/g,'').replace(',','.'))||0});
       }
-    } catch (e) {
-      console.error(e);
-      feedbackEl.innerHTML = `<p class="text-red-600 font-bold">Hubo un error al guardar. Revisa la consola y el Apps Script.</p>`;
-      btnGuardarPrecios.disabled = false; saveText.textContent = 'Guardar Cambios'; saveIcon.className = 'fas fa-save';
+      return out;
     }
-  });
 
-  // botón "Actualizar Precios" en la cabecera: recarga CSV y abre editor
-  a('btn-ir-a-precios').addEventListener('click', async () => {
-    await cargarProductos();
-    cambiarVista('precios');
-  });
+    async function fetchMenu(){
+      const res = await fetch(DB_URL, {cache:'no-store'});
+      const ct = res.headers.get('content-type')||'';
+      let rows=[];
+      if(ct.includes('application/json')){
+        const data = await res.json();
+        // Admite formas: array de objetos o {data:[...]}
+        const arr = Array.isArray(data)? data : (Array.isArray(data.data)? data.data : []);
+        rows = arr.map(x=>({
+          categoria: String(x.Categoría || x.Categoria || x.categoria || x.cat || '').trim(),
+          producto: String(x.Producto || x.producto || '').trim(),
+          tamano:   String(x.Tamaño || x.Tamano || x.tamano || x.size || '').trim(),
+          precio:   Number(String(x.Precio || x.precio || '0').toString().replace(/[^0-9.,]/g,'').replace(',','.'))||0,
+        }));
+      } else { // CSV / texto
+        const txt = await res.text();
+        rows = parseCSV(txt);
+      }
+      // Filtrar válidos
+      rows = rows.filter(r=>r.producto);
+      return rows;
+    }
 
-  // imprimir
-  btnImprimir.addEventListener('click', () => {
-    if (comanda.length === 0) return;
-    const ahora = new Date();
-    const fecha = ahora.toLocaleDateString('es-AR');
-    const hora = ahora.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    const total = comanda.reduce((acc,i)=>acc + (i.cantidad * i.precio),0);
+    function buildCatalog(rows){
+      rawRows = rows;
+      catalog = rows.map(r=>({ id:keyOf(r), ...r }));
+      byProduct = new Map();
+      for(const r of catalog){
+        const k = r.producto;
+        if(!byProduct.has(k)) byProduct.set(k, []);
+        byProduct.get(k).push(r);
+      }
+      // ordenar variantes por tamaño alfabético y precio
+      for(const arr of byProduct.values()) arr.sort((a,b)=> (a.tamano||'').localeCompare(b.tamano||'') || a.precio-b.precio);
+    }
 
-    ticketImprimibleContainer.innerHTML = `
-      <h1>Pizzería "Gourmet"</h1>
-      <p>Fecha: ${fecha}  Hora: ${hora}</p>
-      <p>-----------------------------</p>
-      ${comanda.map(i=>`<div class="item-line"><span>${i.cantidad}x ${i.producto} ${i.tamano}</span><span>$${(i.cantidad*i.precio).toFixed(2)}</span></div>`).join('')}
-      <div class="total-line"><span>TOTAL:</span><span>$${total.toFixed(2)}</span></div>
-      <p style="text-align:center; margin-top:8px;">¡Gracias por su compra!</p>
-    `;
-    window.print();
-  });
+    function renderCards(filter=''){
+      const wrap = $('cards');
+      wrap.innerHTML='';
+      const needle = filter.trim().toLowerCase();
+      const products = [...byProduct.keys()].sort((a,b)=>a.localeCompare(b,'es'))
+        .filter(name => !needle || name.toLowerCase().includes(needle));
+      for(const name of products){
+        const card = document.createElement('button');
+        card.className = 'card';
+        card.innerHTML = `<span>${name}</span>`;
+        card.title = 'Agregar';
+        card.addEventListener('click', ()=> openModalFor(name));
+        wrap.appendChild(card);
+      }
+    }
 
-  // iniciar app
-  function iniciarApp() { cargarProductos(); renderizarComanda(); }
-  iniciarApp();
-});
-</script>
+    function openModalFor(productName){
+      const variants = byProduct.get(productName)||[];
+      $('modalTitle').textContent = productName;
+      const sel = $('sizeSelect');
+      sel.innerHTML='';
+      for(const v of variants){
+        const label = v.tamano ? `${v.tamano} — ${peso(v.precio)}` : `${peso(v.precio)}`;
+        const opt = document.createElement('option');
+        opt.value = v.id; opt.textContent = label; sel.appendChild(opt);
+      }
+      $('qtyInput').value = 1;
+      $('modal').classList.add('active');
+    }
+
+    function closeModal(){ $('modal').classList.remove('active'); }
+
+    function addFromModal(){
+      const id = $('sizeSelect').value;
+      const qty = Math.max(1, parseInt($('qtyInput').value||'1',10));
+      const variant = catalog.find(x=>x.id===id);
+      if(!variant){ closeModal(); return; }
+      const existing = order.find(x=>x.id===id);
+      if(existing){ existing.qty += qty; } else {
+        order.push({ id:variant.id, producto:variant.producto, tamano:variant.tamano, precio:variant.precio, qty });
+      }
+      renderOrder();
+      closeModal();
+    }
+
+    function renderOrder(){
+      const list = $('orderList');
+      list.innerHTML='';
+      let sum = 0;
+      for(const it of order){
+        const li = document.createElement('div');
+        li.className='item';
+        const name = document.createElement('div');
+        name.className='name';
+        name.innerHTML = `${it.producto}${it.tamano?` <span class="meta">(${it.tamano})</span>`:''}`;
+        const price = document.createElement('div'); price.textContent=peso(it.precio);
+        const qty = document.createElement('div'); qty.className='qtyctrl';
+        const minus = document.createElement('button'); minus.textContent='−'; minus.onclick=()=>{ it.qty=Math.max(0,it.qty-1); if(it.qty===0){ order=order.filter(o=>o!==it);} renderOrder(); };
+        const span  = document.createElement('span'); span.textContent=it.qty; span.style.minWidth='18px'; span.style.textAlign='center';
+        const plus  = document.createElement('button'); plus.textContent='+'; plus.onclick=()=>{ it.qty++; renderOrder(); };
+        qty.append(minus,span,plus);
+        const rm = document.createElement('button'); rm.className='remove'; rm.textContent='✕'; rm.onclick=()=>{ order=order.filter(o=>o!==it); renderOrder(); };
+        li.append(name, price, qty, rm);
+        list.appendChild(li);
+        sum += it.precio * it.qty;
+      }
+      $('sumTotal').textContent = peso(sum);
+      localStorage.setItem('pgl_order', JSON.stringify(order));
+    }
+
+    function restoreOrder(){
+      try{ order = JSON.parse(localStorage.getItem('pgl_order')||'[]')||[]; }catch{ order=[] }
+      renderOrder();
+    }
+
+    // ============ Editor de precios ============
+    function showView(hash){
+      const pos = document.querySelector('[data-view="#pos"]');
+      const ed  = document.querySelector('[data-view="#precios"]');
+      if(hash==="#precios"){ ed.classList.add('active'); pos.classList.remove('active'); }
+      else { pos.classList.add('active'); ed.classList.remove('active'); }
+    }
+
+    function renderEditor(){
+      const wrap = $('priceList');
+      wrap.innerHTML='';
+      // mostrar cada variante como fila editable
+      for(const v of catalog){
+        const row = document.createElement('div'); row.className='row-edit'; row.dataset.id=v.id;
+        const title = document.createElement('div');
+        title.innerHTML = `<strong>${v.producto}</strong> <span class="meta">${v.tamano?`(${v.tamano})`:''}</span>`;
+        const cat = document.createElement('div'); cat.className='meta'; cat.textContent = v.categoria||'';
+        const price = document.createElement('input'); price.type='number'; price.step='1'; price.min='0'; price.value = v.precio; price.dataset.orig=v.precio;
+        const now  = document.createElement('div'); now.className='meta'; now.textContent = peso(v.precio);
+        row.append(title, cat, price, now);
+        wrap.appendChild(row);
+      }
+      $('dbLink').href = DB_URL; // abre base
+    }
+
+    async function saveEditor(){
+      const rows = [...document.querySelectorAll('.row-edit')];
+      const updates = [];
+      for(const r of rows){
+        const id = r.dataset.id; const priceInput = r.querySelector('input');
+        const newPrice = Number(priceInput.value||0);
+        const v = catalog.find(x=>x.id===id);
+        if(v && newPrice !== v.precio){
+          updates.push({ categoria:v.categoria, producto:v.producto, tamano:v.tamano, precio:newPrice });
+        }
+      }
+      if(updates.length===0){ $('saveStatus').textContent='No hay cambios.'; return; }
+      $('saveStatus').textContent='Guardando cambios…';
+      try{
+        // POST por lotes; tu Apps Script debe aceptar este payload
+        const res = await fetch(DB_URL_EDIT, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ action:'updatePrices', updates })
+        });
+        const ok = res.ok; const data = ok? await res.json().catch(()=>({success:true})) : null;
+        if(ok && (!data || data.success!==false)){
+          $('saveStatus').textContent = `Cambios guardados (${updates.length}). Recargando…`;
+          await loadAll();
+          renderEditor();
+        } else {
+          $('saveStatus').textContent = 'No se pudo guardar: revisá el Apps Script del backend.';
+        }
+      }catch(err){
+        console.error(err);
+        $('saveStatus').textContent = 'Error de red o CORS. Ver consola.';
+      }
+    }
+
+    // ======= BOOT =======
+    async function loadAll(){
+      const rows = await fetchMenu();
+      buildCatalog(rows);
+      renderCards($('q').value||'');
+      renderOrder();
+    }
+
+    // Eventos UI
+    window.addEventListener('hashchange', ()=> showView(location.hash||'#pos'));
+    $('toggleEditor').addEventListener('click', ()=>{
+      if(location.hash==="#precios") location.hash = '#pos'; else location.hash = '#precios';
+    });
+    $('backPos').addEventListener('click', ()=>{ location.hash='#pos'; });
+    $('reloadBtn').addEventListener('click', loadAll);
+    $('q').addEventListener('input', (e)=> renderCards(e.target.value));
+    $('clearOrder').addEventListener('click', ()=>{ order=[]; renderOrder(); });
+    $('printBtn').addEventListener('click', ()=>{ window.print(); });
+
+    $('cancelModal').addEventListener('click', closeModal);
+    $('confirmModal').addEventListener('click', addFromModal);
+
+    // Inicio
+    showView(location.hash||'#pos');
+    restoreOrder();
+    loadAll().catch(err=>{ console.error(err); alert('No se pudo cargar la base. Ver consola.'); });
+  </script>
 </body>
 </html>
