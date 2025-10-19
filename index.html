@@ -387,6 +387,49 @@
     }
   </style>
 
+
+  <!-- COMANDA / Ticket contrast fix -->
+  <style id="comanda-contrast-fix">
+    /* Contenedor de comanda / ticket */
+    .ticket, .order-list{
+      color: #f0f7f3 !important;
+    }
+    /* Tarjeta seleccionada dentro de la comanda */
+    .order-list .selected,
+    .order-list .card.selected,
+    .ticket .selected,
+    .ticket .card.selected{
+      background: #1b2227 !important;
+      color: #f0f7f3 !important;
+      border-color: #2e5442 !important;
+    }
+    /* Títulos dentro de la comanda */
+    .ticket h1, .ticket h2, .ticket h3,
+    .ticket .title, .ticket .product-title, .ticket .order-title{
+      color: #f0f7f3 !important;
+      font-weight: 800 !important;
+    }
+    /* Etiquetas y subtítulos (p.ej. "Cantidad") */
+    .ticket .label, .ticket .muted, .ticket .hint, .ticket .subtitle, .ticket .qty-label,
+    .order-list .label, .order-list .muted, .order-list .hint{
+      color: #e6efe9 !important;
+    }
+    /* Valores/importe destacados dentro de la tarjeta seleccionada */
+    .ticket .price, .ticket .amount, .ticket .total,
+    .order-list .price, .order-list .amount, .order-list .total{
+      color: #b7f5ce !important; /* verde claro para contraste sobre fondo oscuro */
+      font-weight: 700;
+    }
+    /* Inputs y stepper en la comanda */
+    .ticket input, .ticket select, .ticket textarea{
+      background: #ffffff !important;
+      color: #1a2e24 !important;
+      border: 1px solid #c9d6ce !important;
+    }
+    .ticket .btn{ color: #1a2e24 !important; }
+    .ticket .btn-brand, .ticket .btn.primary{ color: #ffffff !important; }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
