@@ -117,7 +117,7 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0d0f14">
+  <meta name="theme-color" content="#fbfaf8">
 
   <!-- Iconos -->
   <link rel="icon" href="logo-192.png" sizes="192x192">
@@ -130,6 +130,63 @@
 
   <!-- Excel export (SheetJS) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Brand Light Theme (forced) -->
+  <style id="brand-light-theme">
+    :root{
+      /* extracted from brand image */
+      --bg: #fbfaf8;           /* off-white / crema */
+      --bg-soft:#ffffff;
+      --panel:#ffffff;
+      --panel-alt:#fbfaf8;
+      --text:#0e0f0b;          /* casi negro */
+      --muted:#60675c;         /* gris medio verdoso */
+      --primary:#2c4735;       /* verde oscuro (marca) */
+      --primary-contrast:#ffffff;
+      --accent:#bbc5bd;        /* verde salvia claro */
+      --accent-contrast:#0e0f0b;
+      --border:#e6e6e2;
+      --success:#2c4735;
+      --danger:#c62828;
+      --warning:#b78129;
+      --input-bg:#ffffff;
+    }
+    html, body{ background: var(--bg); color: var(--text); }
+    /* neutralizar cualquier modo oscuro previo */
+    @media (prefers-color-scheme: dark){
+      html, body{ background: var(--bg) !important; color: var(--text) !important; }
+    }
+    /* contenedores */
+    .topbar, .wrap, main.view, section, aside, .card, .panel, .modal, .drawer{
+      background: var(--panel);
+      color: var(--text);
+    }
+    .topbar{ border-bottom:1px solid var(--border); box-shadow:0 1px 6px rgba(0,0,0,.05); }
+    .topbar .brand, .topbar a{ color: var(--primary) !important; }
+    .badge, .pill{ background: var(--panel-alt); color: var(--text); border:1px solid var(--border); }
+    a{ color: var(--primary); }
+    /* tablas */
+    table{ background: var(--panel); color: var(--text); border-color: var(--border); }
+    thead th{ background: var(--panel-alt); }
+    tbody tr:nth-child(even){ background: var(--bg-soft); }
+    /* controles */
+    .btn{ background: var(--panel); color: var(--text); border:1px solid var(--border); }
+    .btn:hover{ background: var(--bg-soft); }
+    .btn-brand, .btn.primary{ background: var(--primary); color: var(--primary-contrast); border-color: var(--primary); }
+    .btn-brand:hover, .btn.primary:hover{ filter: brightness(0.95); }
+    .btn.accent{ background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
+    .btn.danger{ background:#c62828; color:#fff; border-color:#c62828; }
+    .btn.success{ background:#2c4735; color:#fff; border-color:#2c4735; }
+    input, select, textarea{ background: var(--input-bg); color: var(--text); border:1px solid var(--border); }
+    input::placeholder, textarea::placeholder{ color: var(--muted); }
+    /* separadores y bordes */
+    hr, .divider{ border-color: var(--border); }
+    /* badges de totales / resúmenes */
+    .order-title, .summary-title{ color: var(--primary); }
+    /* iconos triviales que tal vez se coloreaban en oscuro */
+    .icon, svg{ fill: currentColor; color: var(--primary); }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
