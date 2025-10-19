@@ -275,6 +275,23 @@
     .topbar{ backdrop-filter: saturate(1.1); }
   </style>
 
+
+  <style id="category-override">
+    /* Fondo del bloque de categoría (sube unos tonos) */
+    .category{ background: #243a2f !important; border-color: #2e5442 !important; }
+    .cat-head{ background: #243a2f !important; }
+    /* Título de categoría (Empanadas, etc.) en verde claro del layout */
+    .cat-name{ color: #e6efe9 !important; }
+    /* Contador de productos: texto verde claro, sin pintura */
+    .cat-count{
+      background: transparent !important;
+      color: #e6efe9 !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 4px !important;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -1022,5 +1039,32 @@
       })();
     </script>
     
+
+  <script>
+    // Marcar contador dentro del head de categoría y normalizar colores
+    (function(){
+      function tagCategoryCounts(){
+        document.querySelectorAll('.cat-head').forEach(function(head){
+          // 1) Título: aseguro clase .cat-name al primer h3/span fuerte
+          var title = head.querySelector('.cat-name') || head.querySelector('h3, .title, strong, span');
+          if(title){ title.classList.add('cat-name'); }
+          // 2) Buscar posibles contadores: .pill, .badge o spans con dígitos
+          var candidates = head.querySelectorAll('.pill, .badge, span, small, b, strong, em');
+          candidates.forEach(function(el){
+            var t = (el.textContent||'').trim();
+            if(/^[0-9]+$/.test(t) || /^[0-9]+\s*(prod|items|productos)?$/i.test(t)){
+              el.classList.add('cat-count');
+            }
+          });
+        });
+      }
+      if(document.readyState==='loading'){
+        document.addEventListener('DOMContentLoaded', tagCategoryCounts);
+      }else{
+        tagCategoryCounts();
+      }
+    })();
+  </script>
+
 </body>
 </html>
