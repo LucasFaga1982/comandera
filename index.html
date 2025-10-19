@@ -128,6 +128,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <!-- Excel export (SheetJS) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -211,6 +213,7 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="btnRecalc">Recalcular</button>
         <button class="btn btn-brand" id="btnFinalizarDia">Finalizar DIA</button>
+        <button class="btn" id="btnExportarExcel" title="Descargar Excel">Exportar Excel</button>
       </div>
       <div class="small">“Finalizar DIA” imprime y guarda el cierre en “Días”.</div>
     </aside>
@@ -710,6 +713,140 @@
   restoreCart();
   fetchSheet();
 
+  // ====== Exportar Excel (no rompe flujos) ======
+  function exportExcel(){
+    try{
+      // Utiles locales (reusan helpers existentes)
+      const today = (function(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
+      const monthKey = (s)=> (String(s||"").slice(0,7));
+
+      // 1) Pedidos del día
+      const list = ordersOfToday();
+      const rowsPedidos = list.map(o=>{
+        const hora = o.dateISO ? new Date(o.dateISO).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
+        const itemsTxt = (o.items||[]).map(it=>{
+          const sub = Number(it.cantidad||0) * Number(it.precio||0);
+          const t   = it.tamano ? ` (${it.tamano})` : "";
+          return `${it.cantidad||0}× ${it.producto||""}${t} = ${sub.toFixed(2)}`;
+        }).join(" | ");
+        return {
+          ID: o.id || "",
+          Fecha: o.dateKey || "",
+          Hora: hora,
+          Dirección: o.address || "",
+          Entrega: o.delivery || "",
+          Total: Number(Number(o.total||0).toFixed(2)),
+          Items: itemsTxt
+        };
+      });
+
+      // 2) Productos vendidos (día)
+      const { products, total } = aggregateProducts(list);
+      const rowsProductosDia = (products||[])
+        .sort((a,b)=> a.producto.localeCompare(b.producto,'es') || (a.tamano||"").localeCompare(b.tamano||"",'es'))
+        .map(p=>({ Producto:p.producto, Tamaño:p.tamano||"", Cantidad:p.cantidad, Importe:Number(p.importe.toFixed(2)) }));
+
+      // 3) Resumen mensual desde DÍAS
+      const days = getDays();
+      const byMonth = new Map();
+      for(const d of (days||[])){
+        const mk = monthKey(d.date);
+        if(!mk) continue;
+        const prev = byMonth.get(mk) || {Mes: mk, Pedidos:0, Ingresos:0};
+        prev.Pedidos += Number(d.orders||0);
+        prev.Ingresos += Number(d.total||0);
+        byMonth.set(mk, prev);
+      }
+      const rowsMensual = [...byMonth.values()]
+        .sort((a,b)=> a.Mes.localeCompare(b.Mes,'es'))
+        .map(r=>({ Mes:r.Mes, Pedidos:r.Pedidos, Ingresos:Number(r.Ingresos.toFixed(2)) }));
+
+      // 4) Pedidos históricos (todos)
+      const all = getOrders();
+      const rowsPedidosAll = (all||[]).map(o=>{
+        const hora = o.dateISO ? new Date(o.dateISO).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
+        const itemsTxt = (o.items||[]).map(it=>{
+          const sub = Number(it.cantidad||0) * Number(it.precio||0);
+          const t   = it.tamano ? ` (${it.tamano})` : "";
+          return `${it.cantidad||0}× ${it.producto||""}${t} = ${sub.toFixed(2)}`;
+        }).join(" | ");
+        return {
+          ID: o.id || "",
+          Fecha: o.dateKey || "",
+          Hora: hora,
+          Dirección: o.address || "",
+          Entrega: o.delivery || "",
+          Total: Number(Number(o.total||0).toFixed(2)),
+          Items: itemsTxt
+        };
+      }).sort((a,b)=> a.Fecha.localeCompare(b.Fecha) || a.Hora.localeCompare(b.Hora));
+
+      // 5) Productos históricos totales
+      const mapAll = new Map(); let _tot=0;
+      for(const o of (all||[])){
+        _tot += Number(o.total||0);
+        for(const it of (o.items||[])){
+          const k=(it.producto||"")+"|"+(it.tamano||"");
+          const prev=mapAll.get(k)||{Producto:it.producto||"",Tamaño:it.tamano||"",Cantidad:0,Importe:0};
+          const c=Number(it.cantidad||0), p=Number(it.precio||0);
+          prev.Cantidad += c; prev.Importe += c*p; mapAll.set(k,prev);
+        }
+      }
+      const rowsProductosAll = [...mapAll.values()]
+        .sort((a,b)=> a.Producto.localeCompare(b.Producto,'es') || (a.Tamaño||"").localeCompare(b.Tamaño||"",'es'))
+        .map(r=>({Producto:r.Producto, Tamaño:r.Tamaño, Cantidad:r.Cantidad, Importe:Number(r.Importe.toFixed(2))}));
+
+      // 6) Productos por mes (Mes × Producto × Tamaño)
+      const pivot = new Map();
+      for(const o of (all||[])){
+        const mk = monthKey(o.dateKey||"");
+        for(const it of (o.items||[])){
+          const key = `${mk}|${it.producto||""}|${it.tamano||""}`;
+          const prev = pivot.get(key) || {Mes: mk||"", Producto: it.producto||"", Tamaño: it.tamano||"", Cantidad:0, Importe:0};
+          const c = Number(it.cantidad||0), p = Number(it.precio||0);
+          prev.Cantidad += c; prev.Importe += c*p;
+          pivot.set(key, prev);
+        }
+      }
+      const rowsProdMes = [...pivot.values()]
+        .sort((a,b)=> a.Mes.localeCompare(b.Mes) || a.Producto.localeCompare(b.Producto,'es') || (a.Tamaño||"").localeCompare(b.Tamaño||"",'es'))
+        .map(r=>({ Mes:r.Mes, Producto:r.Producto, Tamaño:r.Tamaño, Cantidad:r.Cantidad, Importe:Number(r.Importe.toFixed(2)) }));
+
+      // 7) DÍAS (detalle crudo)
+      const rowsDias = (days||[]).map(d=>({
+        Fecha: d.date || "",
+        Pedidos: Number(d.orders||0),
+        Ingresos: Number(Number(d.total||0).toFixed(2))
+      })).sort((a,b)=> a.Fecha.localeCompare(b.Fecha));
+
+      // Workbook
+      const wb = XLSX.utils.book_new();
+
+      function js2sheet(rows, cols){
+        const ws = XLSX.utils.json_to_sheet(rows);
+        if(cols) ws['!cols']=cols;
+        return ws;
+      }
+
+      XLSX.utils.book_append_sheet(wb, js2sheet(rowsPedidos,      [{wch:14},{wch:12},{wch:8},{wch:28},{wch:12},{wch:12},{wch:60}]), "Pedidos del día");
+      XLSX.utils.book_append_sheet(wb, js2sheet(rowsProductosDia, [{wch:30},{wch:12},{wch:10},{wch:12}]), "Productos (día)");
+      XLSX.utils.book_append_sheet(wb, js2sheet(rowsMensual,      [{wch:10},{wch:10},{wch:14}]), "Resumen mensual");
+      XLSX.utils.book_append_sheet(wb, js2sheet(rowsPedidosAll,   [{wch:14},{wch:12},{wch:8},{wch:28},{wch:12},{wch:12},{wch:60}]), "Pedidos históricos");
+      XLSX.utils.book_append_sheet(wb, js2sheet(rowsProductosAll, [{wch:30},{wch:12},{wch:10},{wch:12}]), "Productos históricos");
+      XLSX.utils.book_append_sheet(wb, js2sheet(rowsProdMes,      [{wch:10},{wch:30},{wch:12},{wch:10},{wch:12}]), "Productos por mes");
+      XLSX.utils.book_append_sheet(wb, js2sheet(rowsDias,         [{wch:12},{wch:10},{wch:14}]), "DÍAS (detalle)");
+
+      const fileName = `PGL-Export_COMPLETO_${today}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+    }catch(err){
+      console.error(err);
+      alert("No se pudo exportar el Excel. Avisame si persiste.");
+    }
+  }
+
+  const btnX = document.getElementById("btnExportarExcel");
+  if(btnX){ btnX.addEventListener("click", exportExcel); }
+
   // ====== TESTS RÁPIDOS (consola) ======
   console.group("Smoke tests");
   try{ console.assert(typeof qs==="function" && qs("#viewPedidos"), "qs disponible y #viewPedidos existe"); }catch(e){ console.error(e); }
@@ -720,200 +857,6 @@
   try{ console.assert(Array.isArray(JSON.parse(localStorage.getItem(LS_DAYS)||'[]')), 'LS_DAYS es array'); }catch(e){ console.error(e); }
   console.groupEnd();
 })();
-
-  // ====== ✅ NUEVO: Exportar a Excel (.xlsx) COMPLETO ======
-  function monthKey(isoDateYYYY_MM_DD){
-    return (isoDateYYYY_MM_DD||"").slice(0,7);
-  }
-
-  function safeParseLS(key, fallback){
-    // Helper to parse localStorage without throwing
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) return Array.isArray(fallback) ? [] : (fallback ?? []);
-      const parsed = JSON.parse(raw);
-      return parsed ?? (Array.isArray(fallback) ? [] : (fallback ?? []));
-    } catch(e) {
-      console.warn("No se pudo leer", key, e);
-      return Array.isArray(fallback) ? [] : (fallback ?? []);
-    }
-
-  function exportExcel(){
-    try{
-      // ===== Base de datos desde localStorage (defensivo) =====
-      const LS_ORDERS = typeof window.LS_ORDERS === "string" ? window.LS_ORDERS : "pgl_orders";
-      const LS_DAYS   = typeof window.LS_DAYS   === "string" ? window.LS_DAYS   : "pgl_days";
-
-      const allOrders = safeParseLS(LS_ORDERS, []);
-      const days      = safeParseLS(LS_DAYS, []);
-
-      const today = (function(){
-        const d=new Date(); 
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      })();
-
-      // ===== Utilitarios =====
-      function ordersOfDateKey(dateKey){
-        return allOrders.filter(o=>o && o.dateKey===dateKey);
-      }
-      function aggregateProductsFromOrders(orders){
-        const map=new Map(); let total=0;
-        for(const o of orders||[]){
-          total += Number(o.total||0);
-          for(const it of (o.items||[])){
-            const k = (it.producto||"")+"|"+(it.tamano||"");
-            const prev = map.get(k) || {Producto:(it.producto||""),Tamaño:(it.tamano||""),Cantidad:0,Importe:0};
-            const cant = Number(it.cantidad||0);
-            const precio = Number(it.precio||0);
-            prev.Cantidad += cant;
-            prev.Importe  += cant * precio;
-            map.set(k, prev);
-          }
-        }
-        return { products:[...map.values()], total };
-      }
-
-      // ===== 1) Pedidos del día =====
-      const listToday = ordersOfDateKey(today);
-      const rowsPedidosHoy = listToday.map(o=>{
-        const hora = o.dateISO ? new Date(o.dateISO).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
-        const itemsTxt = (o.items||[]).map(it=>{
-          const sub = Number(it.cantidad||0) * Number(it.precio||0);
-          const t   = it.tamano ? ` (${it.tamano})` : "";
-          return `${it.cantidad||0}× ${it.producto||""}${t} = ${sub.toFixed(2)}`;
-        }).join(" | ");
-        return {
-          ID: o.id || "",
-          Fecha: o.dateKey || "",
-          Hora: hora,
-          Dirección: o.address || "",
-          Entrega: o.delivery || "",
-          Total: Number((o.total||0).toFixed ? o.total.toFixed(2) : Number(o.total||0).toFixed(2)),
-          Items: itemsTxt
-        };
-      });
-
-      // ===== 2) Productos vendidos (día) =====
-      const aggToday = aggregateProductsFromOrders(listToday);
-      const rowsProductosHoy = aggToday.products
-        .sort((a,b)=> a.Producto.localeCompare(b.Producto,'es') || (a.Tamaño||"").localeCompare(b.Tamaño||"",'es'))
-        .map(p=>({Producto:p.Producto, Tamaño:p.Tamaño, Cantidad:p.Cantidad, Importe:Number(p.Importe.toFixed(2))}));
-
-      // ===== 3) Resumen mensual (desde DÍAS) =====
-      const byMonth = new Map();
-      for(const d of days){
-        const mk = monthKey(d.date);
-        if(!mk) continue;
-        const prev = byMonth.get(mk) || {Mes: mk, Pedidos:0, Ingresos:0};
-        prev.Pedidos += Number(d.orders||0);
-        prev.Ingresos += Number(d.total||0);
-        byMonth.set(mk, prev);
-      }
-      const rowsMensual = [...byMonth.values()]
-        .sort((a,b)=> a.Mes.localeCompare(b.Mes,'es'))
-        .map(r=>({ Mes:r.Mes, Pedidos:r.Pedidos, Ingresos: Number(r.Ingresos.toFixed(2)) }));
-
-      // ===== 4) Pedidos históricos (TODOS) =====
-      const rowsPedidosAll = (allOrders||[]).map(o=>{
-        const hora = o.dateISO ? new Date(o.dateISO).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
-        const itemsTxt = (o.items||[]).map(it=>{
-          const sub = Number(it.cantidad||0) * Number(it.precio||0);
-          const t   = it.tamano ? ` (${it.tamano})` : "";
-          return `${it.cantidad||0}× ${it.producto||""}${t} = ${sub.toFixed(2)}`;
-        }).join(" | ");
-        return {
-          ID: o.id || "",
-          Fecha: o.dateKey || "",
-          Hora: hora,
-          Dirección: o.address || "",
-          Entrega: o.delivery || "",
-          Total: Number((o.total||0).toFixed ? o.total.toFixed(2) : Number(o.total||0).toFixed(2)),
-          Items: itemsTxt
-        };
-      }).sort((a,b)=> a.Fecha.localeCompare(b.Fecha) || a.Hora.localeCompare(b.Hora));
-
-      // ===== 5) Productos históricos (TOTAL) =====
-      const aggAll = aggregateProductsFromOrders(allOrders);
-      const rowsProductosAll = aggAll.products
-        .sort((a,b)=> a.Producto.localeCompare(b.Producto,'es') || (a.Tamaño||"").localeCompare(b.Tamaño||"",'es'))
-        .map(p=>({Producto:p.Producto, Tamaño:p.Tamaño, Cantidad:p.Cantidad, Importe:Number(p.Importe.toFixed(2))}));
-
-      // ===== 6) Productos por mes (pivot Mes x Producto x Tamaño) =====
-      const pivot = new Map(); // key: Mes|Producto|Tamaño
-      for(const o of (allOrders||[])){
-        const mk = monthKey(o.dateKey||"");
-        for(const it of (o.items||[])){
-          const key = `${mk}|${it.producto||""}|${it.tamano||""}`;
-          const prev = pivot.get(key) || {Mes: mk||"", Producto: it.producto||"", Tamaño: it.tamano||"", Cantidad:0, Importe:0};
-          const cant = Number(it.cantidad||0);
-          const precio = Number(it.precio||0);
-          prev.Cantidad += cant;
-          prev.Importe  += cant * precio;
-          pivot.set(key, prev);
-        }
-      }
-      const rowsProdMes = [...pivot.values()]
-        .sort((a,b)=> a.Mes.localeCompare(b.Mes) || a.Producto.localeCompare(b.Producto,'es') || (a.Tamaño||"").localeCompare(b.Tamaño||"",'es'))
-        .map(r=>({ Mes:r.Mes, Producto:r.Producto, Tamaño:r.Tamaño, Cantidad:r.Cantidad, Importe:Number(r.Importe.toFixed(2)) }));
-
-      // ===== 7) Detalle de DÍAS (crudo) =====
-      const rowsDias = (days||[]).map(d=>({
-        Fecha: d.date || "",
-        Pedidos: Number(d.orders||0),
-        Ingresos: Number((d.total||0).toFixed ? d.total.toFixed(2) : Number(d.total||0).toFixed(2))
-      })).sort((a,b)=> a.Fecha.localeCompare(b.Fecha));
-
-      // ===== Workbook =====
-      const wb = XLSX.utils.book_new();
-
-      function aoa(ws){ return ws; } // placeholder simple
-
-      const wsPedidosHoy   = XLSX.utils.json_to_sheet(rowsPedidosHoy);
-      wsPedidosHoy['!cols']= [{wch:14},{wch:12},{wch:8},{wch:28},{wch:12},{wch:12},{wch:60}];
-
-      const wsProdHoy      = XLSX.utils.json_to_sheet(rowsProductosHoy);
-      wsProdHoy['!cols']   = [{wch:30},{wch:12},{wch:10},{wch:12}];
-
-      const wsMensual      = XLSX.utils.json_to_sheet(rowsMensual);
-      wsMensual['!cols']   = [{wch:10},{wch:10},{wch:14}];
-
-      const wsPedidosAll   = XLSX.utils.json_to_sheet(rowsPedidosAll);
-      wsPedidosAll['!cols']= [{wch:14},{wch:12},{wch:8},{wch:28},{wch:12},{wch:12},{wch:60}];
-
-      const wsProdAll      = XLSX.utils.json_to_sheet(rowsProductosAll);
-      wsProdAll['!cols']   = [{wch:30},{wch:12},{wch:10},{wch:12}];
-
-      const wsProdMes      = XLSX.utils.json_to_sheet(rowsProdMes);
-      wsProdMes['!cols']   = [{wch:10},{wch:30},{wch:12},{wch:10},{wch:12}];
-
-      const wsDias         = XLSX.utils.json_to_sheet(rowsDias);
-      wsDias['!cols']      = [{wch:12},{wch:10},{wch:14}];
-
-      XLSX.utils.book_append_sheet(wb, wsPedidosHoy, "Pedidos del día");
-      XLSX.utils.book_append_sheet(wb, wsProdHoy,    "Productos (día)");
-      XLSX.utils.book_append_sheet(wb, wsMensual,    "Resumen mensual");
-      XLSX.utils.book_append_sheet(wb, wsPedidosAll, "Pedidos históricos");
-      XLSX.utils.book_append_sheet(wb, wsProdAll,    "Productos históricos");
-      XLSX.utils.book_append_sheet(wb, wsProdMes,    "Productos por mes");
-      XLSX.utils.book_append_sheet(wb, wsDias,       "DÍAS (detalle)");
-
-      const fileName = `PGL-Export_COMPLETO_${today}.xlsx`;
-      XLSX.writeFile(wb, fileName);
-    }catch(err){
-      console.error(err);
-      alert("No se pudo exportar el Excel completo. Reintentá o avisame si persiste.");
-    }
-  }
-
-  // Listener del botón (idempotente/defensivo)
-  (function(){
-    const b = document.getElementById("btnExportar");
-    if (b) {
-      b.removeEventListener("click", exportExcel);
-      b.addEventListener("click", exportExcel);
-    }
-  })();
-
 </script>
 </body>
 </html>
