@@ -726,7 +726,7 @@
     return (isoDateYYYY_MM_DD||"").slice(0,7);
   }
 
-  function safeParseLS(key, fallback):
+  function safeParseLS(key, fallback){
     // Helper to parse localStorage without throwing
     try {
       const raw = localStorage.getItem(key);
