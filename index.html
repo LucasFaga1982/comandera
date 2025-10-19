@@ -117,7 +117,7 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#fbfaf8">
+  <meta name="theme-color" content="#ecf2ef">
 
   <!-- Iconos -->
   <link rel="icon" href="logo-192.png" sizes="192x192">
@@ -185,6 +185,52 @@
     .order-title, .summary-title{ color: var(--primary); }
     /* iconos triviales que tal vez se coloreaban en oscuro */
     .icon, svg{ fill: currentColor; color: var(--primary); }
+  </style>
+
+
+  <!-- Brand Light Theme (green contrast variant) -->
+  <style id="brand-light-contrast">
+    :root{
+      /* Verde oscuro de marca para tipografía */
+      --text:#2c4735;
+      --primary:#2c4735;
+      --primary-contrast:#ffffff;
+      /* Fondos verde claro para alto contraste */
+      --bg:#ecf2ef;          /* base (muy claro) */
+      --bg-soft:#f6faf8;     /* aún más claro */
+      --panel:#e6efe9;       /* paneles/cards */
+      --panel-alt:#dfe9e3;   /* headers de tabla, chips */
+      --accent:#bbc5bd;      /* salvia */
+      --accent-contrast:#2c4735;
+      --muted:#4e6a5b;
+      --border:#cdd9d2;
+      --input-bg:#ffffff;
+      --success:#2c4735;
+      --danger:#c62828;
+      --warning:#b78129;
+    }
+    html, body{ background: var(--bg) !important; color: var(--text) !important; }
+    .topbar, .wrap, main.view, section, aside, .card, .panel, .modal, .drawer{
+      background: var(--panel) !important;
+      color: var(--text) !important;
+      border-color: var(--border) !important;
+    }
+    .topbar{ border-bottom:1px solid var(--border) !important; box-shadow:0 1px 6px rgba(0,0,0,.05) !important; }
+    a, .brand, .order-title, .summary-title{ color: var(--primary) !important; }
+    table{ background: var(--panel) !important; color: var(--text) !important; border-color: var(--border) !important; }
+    thead th{ background: var(--panel-alt) !important; }
+    tbody tr:nth-child(even){ background: var(--bg-soft) !important; }
+    .badge, .pill{ background: var(--panel-alt) !important; color: var(--text) !important; border:1px solid var(--border) !important; }
+    .btn{ background: var(--panel) !important; color: var(--text) !important; border:1px solid var(--border) !important; }
+    .btn:hover{ background: var(--bg-soft) !important; }
+    .btn-brand, .btn.primary{ background: var(--primary) !important; color: var(--primary-contrast) !important; border-color: var(--primary) !important; }
+    .btn-brand:hover, .btn.primary:hover{ filter: brightness(0.95) !important; }
+    .btn.accent{ background: var(--accent) !important; color: var(--accent-contrast) !important; border-color: var(--accent) !important; }
+    input, select, textarea{ background: var(--input-bg) !important; color: var(--text) !important; border:1px solid var(--border) !important; }
+    input::placeholder, textarea::placeholder{ color: var(--muted) !important; }
+    hr, .divider{ border-color: var(--border) !important; }
+    /* Si existe alguna clase tipo .dark o se aplican invertidos, neutralizamos */
+    .dark, [data-theme="dark"]{ background: var(--panel) !important; color: var(--text) !important; }
   </style>
 
 </head>
