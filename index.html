@@ -292,6 +292,65 @@
     }
   </style>
 
+
+  <!-- Contrast boost for Variant C -->
+  <style id="contrast-variant-C">
+    /* Paleta afinada para mayor contraste */
+    :root{
+      --text:#1a2e24;             /* más oscuro que #2c4735 para cuerpo */
+      --heading:#0f1d16;          /* títulos súper legibles */
+      --muted:#2d4a3c;            /* secundarios con más contraste */
+      --primary:#2c4735;          /* sigue siendo el verde de marca */
+      --primary-contrast:#ffffff; /* blanco sobre primario */
+      --bg:#ecf2ef;               /* base */
+      --bg-soft:#f6faf8;          /* alterno */
+      --panel:#e6efe9;            /* panel */
+      --panel-alt:#dfe9e3;        /* headers */
+      --accent:#bbc5bd;           /* salvia claro */
+      --accent-contrast:#1a2e24;  /* texto más oscuro sobre acento claro */
+      --border:#c9d6ce;
+      --input-bg:#ffffff;
+    }
+
+    html, body{ color: var(--text) !important; }
+    h1,h2,h3,.order-title,.summary-title{ color: var(--heading) !important; }
+
+    /* Enlaces y acciones con mejor legibilidad */
+    a{ color: var(--primary) !important; text-underline-offset: 2px; }
+    a:hover{ filter: brightness(.92); }
+
+    /* Tablas — encabezados y celdas con contraste mejorado */
+    table{ color: var(--text) !important; }
+    thead th{ color: var(--heading) !important; background: var(--panel-alt) !important; }
+    tbody td{ color: var(--text) !important; }
+
+    /* Placeholders y textos secundarios */
+    input::placeholder, textarea::placeholder{ color: var(--muted) !important; opacity: .95; }
+    .small, .muted, .hint, .subtle{ color: var(--muted) !important; }
+
+    /* Botones */
+    .btn{ color: var(--text) !important; border-color: var(--border) !important; }
+    .btn-brand, .btn.primary{ background: var(--primary) !important; color: var(--primary-contrast) !important; }
+    .btn.accent{ background: var(--accent) !important; color: var(--accent-contrast) !important; }
+
+    /* Categorías: aún más contraste en cabecera y conteo */
+    .category{ background: #223a2e !important; }  /* un poco más oscuro */
+    .cat-head{ background: #223a2e !important; }
+    .cat-name{ color: #f0f7f3 !important; font-weight: 800 !important; }
+    .cat-count{ color: #f0f7f3 !important; background: transparent !important; border: none !important; }
+
+    /* Etiquetas/badges genéricas */
+    .badge, .pill{ color: var(--text) !important; background: var(--panel-alt) !important; border: 1px solid var(--border) !important; }
+
+    /* Inputs con texto más oscuro */
+    input, select, textarea{ color: var(--heading) !important; }
+
+    /* Tickets/impresiones (si hay inverso) forzar color alto contraste */
+    @media print{
+      body{ color: #000 !important; }
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
