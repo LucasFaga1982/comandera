@@ -233,6 +233,48 @@
     .dark, [data-theme="dark"]{ background: var(--panel) !important; color: var(--text) !important; }
   </style>
 
+
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
+  <style id="typography-C">
+    :root{
+      --font-ui: 'Work Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --radius: 12px;
+    }
+    html, body{ font-family: var(--font-ui); font-size: 15.5px; line-height: 1.38; }
+    .card, .panel, .modal, .drawer, .btn{ border-radius: var(--radius); }
+    table td, table th{ padding: 10px 12px; font-variant-numeric: tabular-nums; }
+    .order-title, .summary-title{ font-weight: 700; letter-spacing: .2px; }
+  </style>
+
+
+  
+  <style id="btn-contrast-fix">
+    /* Botón EDITAR con contraste asegurado */
+    .btn[data-variant="edit"]{
+      background: #cfe5d8 !important;   /* verde muy claro */
+      color: #2c4735 !important;         /* verde oscuro (texto) */
+      border-color: #a9cbb7 !important;
+    }
+    .btn[data-variant="edit"]:hover{
+      background: #bdddcd !important;
+    }
+    /* Asegurar contraste de .btn por defecto vs texto */
+    .btn{
+      background: var(--panel) !important;
+      color: #2c4735 !important;
+      border: 1px solid var(--border) !important;
+    }
+    /* Píldoras/badges más suaves */
+    .badge, .pill{ background: var(--panel-alt) !important; border-color: var(--border) !important; }
+  </style>
+
+  <style id="theme-C-extras">
+    .btn-brand, .btn.primary{ border-radius: 10px !important; }
+    .topbar{ backdrop-filter: saturate(1.1); }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -961,5 +1003,24 @@
   console.groupEnd();
 })();
 </script>
+
+    <script>
+      // Etiquetar botones "Editar" para poder cambiar su color sin romper nada
+      (function(){
+        function tagEdits(){
+          var btns = document.querySelectorAll('button, a.btn');
+          btns.forEach(function(b){
+            var t = (b.textContent || '').trim().toLowerCase();
+            if(t.includes('editar')){ b.setAttribute('data-variant','edit'); }
+          });
+        }
+        if (document.readyState === 'loading'){
+          document.addEventListener('DOMContentLoaded', tagEdits);
+        } else {
+          tagEdits();
+        }
+      })();
+    </script>
+    
 </body>
 </html>
