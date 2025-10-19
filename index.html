@@ -351,6 +351,42 @@
     }
   </style>
 
+
+  <!-- Modal contrast fix (titles & labels) -->
+  <style id="modal-contrast-fix">
+    /* Título del producto dentro del modal */
+    .modal h1, .modal h2, .modal h3, .modal .title, .modal .product-title, .modal .order-title{
+      color: #f0f7f3 !important;   /* muy claro para fondo oscuro */
+      font-weight: 800 !important;
+      letter-spacing: .2px;
+    }
+    /* Etiquetas/leyendas como "Cantidad" */
+    .modal label, .modal .label, .modal .hint, .modal .muted, .modal .qty-label, .modal .legend{
+      color: #e6efe9 !important;   /* claro */
+      font-weight: 600;
+    }
+    /* Contenedores del modal mantienen fondo oscuro, pero paneles internos con leve borde */
+    .modal, .drawer{
+      background: #1b2227 !important; /* un tono menos negro para aumentar contraste con texto claro */
+      color: #f0f7f3 !important;
+    }
+    .modal .card, .modal .panel{
+      border-color: #2e5442 !important;
+    }
+    /* Inputs en modal: texto oscuro sobre fondo claro para buena lectura */
+    .modal input, .modal select, .modal textarea{
+      background: #ffffff !important;
+      color: #1a2e24 !important;
+      border: 1px solid #c9d6ce !important;
+    }
+    .modal .btn{
+      color: #1a2e24 !important;
+    }
+    .modal .btn-brand, .modal .btn.primary{
+      color: #ffffff !important;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
